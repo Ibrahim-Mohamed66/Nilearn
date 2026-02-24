@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Nilearn.API/Nilearn.API.csproj" />
+    <Project Path="Nilearn.Application/Nilearn.Application.csproj" />
+    <Project Path="Nilearn.Domain/Nilearn.Domain.csproj" />
+    <Project Path="Nilearn.Infrastructure/Nilearn.Infrastructure.csproj" />
+    <Project Path="Nilearn.Shared/Nilearn.Shared.csproj" />
+  </Folder>
+</Solution>
