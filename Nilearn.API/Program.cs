@@ -1,5 +1,6 @@
 
 using Nilearn.API.Middlewares;
+using Serilog;
 
 namespace Nilearn.API
 {
@@ -10,6 +11,14 @@ namespace Nilearn.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Host.UseSerilog((hostingContext, services,configuration) =>
+            {
+                configuration
+                .ReadFrom.Configuration(hostingContext.Configuration)
+                .Enrich.FromLogContext()
+                .ReadFrom.Services(services);
+
+            });
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -25,7 +34,7 @@ namespace Nilearn.API
 
             app.UseHttpsRedirection();
             app.UseMiddleware<ExceptionMiddleware>();
-
+            app.UseMiddleware<RequestLoggingMiddleware>();
             app.UseAuthorization();
 
 
