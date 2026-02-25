@@ -1,4 +1,6 @@
 
+using Nilearn.API.Middlewares;
+
 namespace Nilearn.API
 {
     public class Program
@@ -22,6 +24,7 @@ namespace Nilearn.API
             }
 
             app.UseHttpsRedirection();
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseAuthorization();
 
