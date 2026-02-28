@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
-
-
 namespace Nilearn.Domain.Entities;
 public class AppUser : IdentityUser<Guid>
 {
@@ -25,6 +22,7 @@ public class AppUser : IdentityUser<Guid>
     public string? FullName => $"{FirstName} {LastName}";
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public Instructor? InstructorProfile { get; set; }
+    public Student? StudentProfile { get; set; }
     public void RevokeActiveRefreshTokens()
     {
         foreach (var token in RefreshTokens.Where(t => t.IsActive))

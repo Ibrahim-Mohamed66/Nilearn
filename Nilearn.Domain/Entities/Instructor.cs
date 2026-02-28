@@ -1,8 +1,8 @@
 ﻿namespace Nilearn.Domain.Entities;
 public class Instructor
 {
-    public Guid Id { get; set; }
-    public Guid UserId { get; set; }
+    public int Id { get; set; }
+    public Guid AppUserId { get; set; }
     public string Bio { get; set; } = string.Empty;
     public string? Headline { get; set; }
     public string? WebsiteUrl { get; set; }
