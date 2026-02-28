@@ -1,6 +1,6 @@
 using Nilearn.API.Middlewares;
 using Serilog;
-
+using Nilearn.Infrastructure.DependecyInjection;
 namespace Nilearn.API
 {
     public class Program
@@ -18,7 +18,8 @@ namespace Nilearn.API
                 .ReadFrom.Services(services);
 
             });
-           
+            builder.Services.AddInfrastructureServices(builder.Configuration);
+
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
