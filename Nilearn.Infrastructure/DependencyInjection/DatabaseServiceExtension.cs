@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Nilearn.Domain.Interfaces;
+using Nilearn.Infrastructure.Initializer;
 using Nilearn.Infrastructure.Persistence;
-using System;
+using Nilearn.Infrastructure.Repositories;
 
-namespace Nilearn.Infrastructure.DependecyInjection
+
+namespace Nilearn.Infrastructure.DependencyInjection
 {
     public static class DatabaseServiceExtension
     {
@@ -21,8 +24,9 @@ namespace Nilearn.Infrastructure.DependecyInjection
 
             // Register DbContext with PostgreSQL
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(connectionString)
-            );
+                options.UseNpgsql(connectionString))
+                .AddScoped<IUnitOfWork, UnitOfWork>();
+            
 
             return services;
         }

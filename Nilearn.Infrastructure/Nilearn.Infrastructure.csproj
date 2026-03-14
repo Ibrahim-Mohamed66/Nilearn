@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -20,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Nilearn.Application\Nilearn.Application.csproj" />
     <ProjectReference Include="..\Nilearn.Domain\Nilearn.Domain.csproj" />
+    <ProjectReference Include="..\Nilearn.Shared\Nilearn.Shared.csproj" />
   </ItemGroup>
 
 </Project>
