@@ -1,11 +1,12 @@
 using Nilearn.API.Middlewares;
 using Serilog;
-using Nilearn.Infrastructure.DependecyInjection;
+using Nilearn.Infrastructure.DependencyInjection;
+using Nilearn.Application.DependencyInjection;
 namespace Nilearn.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +19,19 @@ namespace Nilearn.API
                 .ReadFrom.Services(services);
 
             });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                           .AllowCredentials();
+                });
+            });
+            
             builder.Services.AddInfrastructureServices(builder.Configuration);
-
+            builder.Services.AddApplicationServices();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
@@ -31,12 +43,13 @@ namespace Nilearn.API
             {
                 app.MapOpenApi();
             }
-
+            //await app.SeedDatabaseAsync();
+            app.UseCors("AllowFrontend");
             app.UseHttpsRedirection();
-            app.UseMiddleware<ExceptionMiddleware>();
             app.UseMiddleware<RequestLoggingMiddleware>();
+            app.UseMiddleware<ExceptionMiddleware>();
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

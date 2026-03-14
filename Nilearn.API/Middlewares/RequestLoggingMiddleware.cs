@@ -1,5 +1,7 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 namespace Nilearn.API.Middlewares
 {
     public class RequestLoggingMiddleware
@@ -16,6 +18,8 @@ namespace Nilearn.API.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
+            var stopwatch = Stopwatch.StartNew();
+
             // Read and log the request
             string requestBody = await ReadRequestBody(context.Request);
             requestBody = MaskSensitiveData(requestBody);
@@ -34,12 +38,12 @@ namespace Nilearn.API.Middlewares
             await _next(context); // Let exception middleware handle errors
 
             // Read and log response
+            stopwatch.Stop(); // Stop stopwatch after request finishes  
             string responseBodyText = await ReadResponseBody(context.Response);
+            responseBodyText = MaskSensitiveData(responseBodyText);
             _logger.LogInformation("HTTP Response {StatusCode} {ElapsedMilliseconds}ms {ResponseBody}",
                 context.Response.StatusCode,
-                context.Response.Headers.ContainsKey("X-Elapsed-Milliseconds")
-                    ? context.Response.Headers["X-Elapsed-Milliseconds"].ToString()
-                    : "N/A",
+                 stopwatch.ElapsedMilliseconds,
                 responseBodyText);
 
             // Copy the response back
@@ -80,31 +84,48 @@ namespace Nilearn.API.Middlewares
 
             try
             {
+                var jsonNode = JsonNode.Parse(body);
+                if (jsonNode == null) return body;
 
-                var jsonObj = JsonSerializer.Deserialize<Dictionary<string, object>>( body,
-                       new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                       );
+                // List of sensitive fields to mask (checked case-insensitively)
+                string[] sensitiveFields = { "password", "token", "accesstoken", "accesstokens", "refreshtoken", "refreshtokens", "creditcard", "ssn" };
 
+                MaskNode(jsonNode, sensitiveFields);
 
-                if (jsonObj == null) return body;
-
-                // List of sensitive fields to mask
-                string[] sensitiveFields = { "password", "token", "access_token", "refresh_token", "creditCard", "ssn" };
-
-                foreach (var field in sensitiveFields)
-                {
-                    if (jsonObj.ContainsKey(field))
-                    {
-                        jsonObj[field] = "****"; // Mask the value
-                    }
-                }
-
-                return JsonSerializer.Serialize(jsonObj);
+                return jsonNode.ToJsonString();
             }
             catch
             {
-
                 return body;
+            }
+        }
+
+        private void MaskNode(JsonNode node, string[] sensitiveFields)
+        {
+            if (node is JsonObject obj)
+            {
+                var properties = obj.ToList();
+                foreach (var prop in properties)
+                {
+                    if (sensitiveFields.Contains(prop.Key.ToLowerInvariant()))
+                    {
+                        obj[prop.Key] = "****"; // Mask the value
+                    }
+                    else if (prop.Value != null)
+                    {
+                        MaskNode(prop.Value, sensitiveFields);
+                    }
+                }
+            }
+            else if (node is JsonArray arr)
+            {
+                foreach (var item in arr)
+                {
+                    if (item != null)
+                    {
+                        MaskNode(item, sensitiveFields);
+                    }
+                }
             }
         }
     }
