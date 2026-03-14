@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Infrastructure.Configuration;
 using Nilearn.Infrastructure.Configurations;
+using System.Linq.Expressions;
 
 
 namespace Nilearn.Infrastructure.Persistence
