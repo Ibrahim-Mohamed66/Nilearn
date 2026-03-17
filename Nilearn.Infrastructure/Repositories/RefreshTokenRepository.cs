@@ -19,7 +19,7 @@ namespace Nilearn.Infrastructure.Repositories
             await _context.AddAsync(refreshToken,cancellationToken);
         }
 
-        public async Task<AppUser?> GetAppUserByTokenAsync(string refreshToken)
+        public async Task<AppUser?> GetAppUserByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
            var token = await _context.RefreshTokens
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
@@ -30,14 +30,14 @@ namespace Nilearn.Infrastructure.Repositories
             return user;
         }
 
-        public async Task<RefreshToken> GetRefreshTokenAsync(string refreshToken)
+        public async Task<RefreshToken> GetRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken =default)
         {
             var token = await _context.RefreshTokens
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
             return token;
         }
 
-        public async Task<bool> HasValidRefreshTokenAsync(Guid userId)
+        public async Task<bool> HasValidRefreshTokenAsync(Guid userId ,CancellationToken cancellationToken = default) 
         {
             return await _context.RefreshTokens
                 .Where(r => r.UserId == userId)
@@ -46,14 +46,14 @@ namespace Nilearn.Infrastructure.Repositories
 
         }
 
-        public async Task<bool> IsRefreshTokenValidAsync(string refreshToken)
+        public async Task<bool> IsRefreshTokenValidAsync(string refreshToken,CancellationToken cancellationToken = default)
         {
             return await _context.RefreshTokens
               .WhereActive()
               .AnyAsync(rt => rt.Token == refreshToken);
         }
 
-        public async Task RevokeRefreshTokenAsync(string refreshToken)
+        public async Task RevokeRefreshTokenAsync(string refreshToken , CancellationToken cancellationToken = default)
         {
             var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
             if(token != null)

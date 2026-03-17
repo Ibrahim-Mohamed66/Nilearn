@@ -1,35 +1,44 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Interfaces;
+using Nilearn.Application.Features.Auth.EmailVerification.SendEmailVerification.Commands;
+using Nilearn.Application.Services;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Shared.Models;
 
-
 namespace Nilearn.Application.Features.Auth.Register.Student.Commands
 {
-    public sealed class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, Result<string>>
+    internal sealed class RegisterStudentCommandHandler : IRequestHandler<RegisterStudentCommand, Result<string>>
     {
         private readonly ILogger<RegisterStudentCommandHandler> _logger;
         private readonly UserManager<AppUser> _userManager;
-        private readonly JwtSettings _jwt;
         private readonly IUnitOfWork _unitOfWork;
-        public RegisterStudentCommandHandler(ILogger<RegisterStudentCommandHandler> logger, UserManager<AppUser> userManager, IOptions<JwtSettings> jwt, IUnitOfWork unitOfWork)
+        private readonly IEmailVerificationService _emailVerificationService;
+
+        public RegisterStudentCommandHandler(
+            ILogger<RegisterStudentCommandHandler> logger,
+            UserManager<AppUser> userManager,
+            IUnitOfWork unitOfWork,
+            IEmailVerificationService emailVerificationService)
         {
             _logger = logger;
             _userManager = userManager;
-            _jwt = jwt.Value;
             _unitOfWork = unitOfWork;
+            _emailVerificationService = emailVerificationService;
         }
 
         public async Task<Result<string>> Handle(RegisterStudentCommand request, CancellationToken cancellationToken)
         {
             if (await _userManager.FindByEmailAsync(request.registerRequestDto.Email) != null)
+            {
+                _logger.LogWarning("Registration failed: email {Email} is already in use.", request.registerRequestDto.Email);
                 return Result<string>.FailureResponse(
-                    new List<string> { "Email is already in use." }, "Registration failed.");
+                    new List<string> { "Email is already in use." }, "Email is already in use.");
+            }
 
             var user = new AppUser
             {
@@ -38,50 +47,58 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
                 FirstName = request.registerRequestDto.FirstName,
                 LastName = request.registerRequestDto.LastName,
                 DateOfBirth = request.registerRequestDto.DateOfBirth,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
             };
+
             var result = await _userManager.CreateAsync(user, request.registerRequestDto.Password);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
+                _logger.LogWarning("Registration failed for {Email}: {Errors}",
+                    user.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
+                return Result<string>.FailureResponse(
+                    result.Errors.Select(e => e.Description).ToList(), "Registration failed");
+            }
+
+            var studentProfile = new Nilearn.Domain.Entities.Student
+            {
+                AppUserId = user.Id,
+                CurrentLevel = request.registerRequestDto.CurrentLevel,
+                StudentNumber = request.registerRequestDto.StudentNumber
+            };
+
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
+                await _unitOfWork.StudentRepository.AddAsync(studentProfile, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
                 await _userManager.AddToRoleAsync(user, Role.Student.ToString());
-                _logger.LogInformation("User registered successfully with email: {Email}", user.Email);
-                var studentProfile = new Nilearn.Domain.Entities.Student
-                {
-                    AppUserId = user.Id,
-                    CurrentLevel = 1,
-                    StudentNumber = request.registerRequestDto.StudentNumber,
-                };
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
-                try
-                {
-                    await _unitOfWork.BeginTransactionAsync(cancellationToken);
-                    await _unitOfWork.StudentRepository.AddAsync(studentProfile, cancellationToken);
-                    await _unitOfWork.SaveChangesAsync(cancellationToken);
-                    await _unitOfWork.CommitTransactionAsync(cancellationToken);
-                    _logger.LogInformation("Student profile created successfully for user with email: {Email}", user.Email);
-
-                }
-                catch (Exception ex)
-                {
-                    await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                    _logger.LogError(ex, "Failed to create student profile for user with email: {Email}", user.Email);
-                    await _userManager.DeleteAsync(user);
-                    throw;
-                }
-
-
-                return Result<string>.SuccessResponse("User registered successfully.", "Registration successful.");
-
-
+                _logger.LogInformation("User {Email} registered successfully.", user.Email);
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogError("User registration failed for email: {Email} - Errors: {Errors}", user.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
-                return Result<string>.FailureResponse(result.Errors.Select(e => e.Description).ToList(), "Registration failed.");
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                await _userManager.DeleteAsync(user);
+                _logger.LogError(ex, "Registration transaction failed for {Email}.", user.Email);
+                throw;
             }
 
+            try
+            {
+                await _emailVerificationService.SendVerificationEmailAsync(user, cancellationToken);
 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send verification email for user {UserId}.", user.Id);
+                // — user can request resend
+            }
 
+            return Result<string>.SuccessResponse(
+                "Success",
+                "User registered successfully. Please check your email to verify your account."
+            );
         }
     }
 }

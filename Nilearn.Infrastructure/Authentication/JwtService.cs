@@ -27,7 +27,7 @@ namespace Nilearn.Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            foreach (var role in roles)
+            foreach (var role in roles) 
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
 
             var authSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SecretKey));

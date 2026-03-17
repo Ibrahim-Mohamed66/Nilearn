@@ -1,7 +1,11 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.Commands;
+using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.DTOs;
 using Nilearn.Application.Features.Auth.Login.Commands;
 using Nilearn.Application.Features.Auth.Login.DTOs;
+using Nilearn.Application.Features.Auth.Logout.Commands;
 using Nilearn.Application.Features.Auth.RefreshToken.Command;
 using Nilearn.Application.Features.Auth.Register.Student.Commands;
 using Nilearn.Application.Features.Auth.Register.Student.DTOs;
@@ -13,62 +17,84 @@ namespace Nilearn.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<AuthController> _logger;
-        public AuthController(IMediator mediator, ILogger<AuthController> logger)
+        public AuthController(IMediator mediator)
         {
             _mediator = mediator;
-            _logger = logger;
         }
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto,CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new LoginCommand(loginRequestDto));
+            var result = await _mediator.Send(new LoginCommand(loginRequestDto), cancellationToken);
+
             if (!result.Success)
-            {
-                _logger.LogWarning("Login attempt failed for email: {Email}. Errors: {Errors}", loginRequestDto.Email, string.Join(", ", result.Errors ?? new List<string>()));
-                return Ok(result);
-            }
+                return Unauthorized(result);
+
             SetRefreshTokenCookie(result.Data.RefreshToken, result.Data.ExpiresAt);
             //SetAccessTokenCookie(result.Data.AccessToken);
-
-            _logger.LogInformation("Login successful for email: {Email}", loginRequestDto.Email);
             return Ok(result);
         }
-        [HttpPost]
-        [Route("register-student")]
-        public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentRequestDto registerStudentRequestDto)
+
+        [HttpPost("register/student")]
+        public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentRequestDto registerStudentRequestDto, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new RegisterStudentCommand(registerStudentRequestDto));
+            var result = await _mediator.Send(new RegisterStudentCommand(registerStudentRequestDto), cancellationToken);
+
             if (!result.Success)
-            {
-                _logger.LogWarning("Student registration failed for email: {Email}. Errors: {Errors}", registerStudentRequestDto.Email, string.Join(", ", result.Errors ?? new List<string>()));
                 return BadRequest(result);
-            }
-            _logger.LogInformation("Student registration successful for email: {Email}", registerStudentRequestDto.Email);
+
             return Ok(result);
         }
 
-        [HttpPost]
-        [Route("refresh-token")]
-        public async Task<IActionResult> RefreshToken()
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
         {
             if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
-            {
-                _logger.LogWarning("Refresh token not found in cookies.");
                 return BadRequest(new { Message = "Refresh token is missing." });
-            }
-            var result = await _mediator.Send(new RefreshTokenCommand(refreshToken));
+
+            var result = await _mediator.Send(new RefreshTokenCommand(refreshToken), cancellationToken);
+
             if (!result.Success)
-            {
-                _logger.LogWarning("Refresh token attempt failed. Errors: {Errors}", string.Join(", ", result.Errors ?? new List<string>()));
-                return BadRequest(result);
-            }
+                return Unauthorized(result);
+
             SetRefreshTokenCookie(result.Data.RefreshToken, result.Data.ExpiresAt);
-            //SetAccessTokenCookie(result.Data.AccessToken);
-            _logger.LogInformation("Refresh token successful.");
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+        {
+            if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+                return BadRequest(new { Message = "Refresh token is missing." });
+
+            var result = await _mediator.Send(new LogoutCommand(refreshToken), cancellationToken);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            Response.Cookies.Delete("refreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Path = "/"
+            });
+
+            return Ok(result);
+        }
+
+        [HttpGet("email/confirm")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequestDto request, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new ConfirmEmailCommand(request), cancellationToken);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         #region Helpers
         private void SetRefreshTokenCookie(string refreshToken, DateTime expiresAt)
         {
@@ -77,11 +103,13 @@ namespace Nilearn.API.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
-                Expires = expiresAt
+                Expires = expiresAt,
+                Path = "/"
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
-        //private void SetAccessTokenCookie(string accessToken)
+        // TO DO
+        //private void SetAccessTokenCookie(string  accessToken)
         //{
         //    var cookieOptions = new CookieOptions
         //    {
@@ -89,7 +117,7 @@ namespace Nilearn.API.Controllers
         //        Secure = true,
         //        SameSite = SameSiteMode.Strict,
         //        Expires = DateTime.UtcNow.AddMinutes(15)
-
+        //        Path = "/"
         //    };
         //    Response.Cookies.Append("accessToken", accessToken, cookieOptions);
         //} 
