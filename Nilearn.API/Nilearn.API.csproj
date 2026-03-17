@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\Templates\ResetPassword.html" />
+    <Content Remove="wwwroot\Templates\VerifyEmail.html" />
+    <Content Remove="wwwroot\Templates\Welcome.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire" Version="1.8.23" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -23,6 +31,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Nilearn.Infrastructure\Nilearn.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Templates\ResetPassword.html" />
+    <None Include="wwwroot\Templates\VerifyEmail.html" />
+    <None Include="wwwroot\Templates\Welcome.html" />
   </ItemGroup>
 
 </Project>

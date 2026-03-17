@@ -1,7 +1,15 @@
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.PostgreSql;
+using Microsoft.Extensions.Options;
+using Nilearn.API.Hangfire;
+using Nilearn.API.Hangfire.Jobs;
 using Nilearn.API.Middlewares;
-using Serilog;
-using Nilearn.Infrastructure.DependencyInjection;
+using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.DependencyInjection;
+using Nilearn.Infrastructure.DependencyInjection;
+using Nilearn.Shared.Models;
+using Serilog;
 namespace Nilearn.API
 {
     public class Program
@@ -11,6 +19,11 @@ namespace Nilearn.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.Configure<Configuration>(builder.Configuration.GetSection("AppSettings"));
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<Configuration>>().Value);
+            var configuration = builder.Configuration.GetSection("AppSettings").Get<Configuration>();
+
             builder.Host.UseSerilog((hostingContext, services,configuration) =>
             {
                 configuration
@@ -23,15 +36,31 @@ namespace Nilearn.API
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
+                    policy.WithOrigins(configuration.FrontendUrl)
                            .AllowAnyHeader()
                            .AllowAnyMethod()
                            .AllowCredentials();
                 });
             });
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+
+            // Replace the placeholder with the environment variable
+            var pgPassword = Environment.GetEnvironmentVariable("PG_PASSWORD") ?? "";
+            connectionString = connectionString.Replace("${PG_PASSWORD}", pgPassword);
+
+            builder.Services.AddHangfire(config =>
+            {
+                config.UsePostgreSqlStorage(options =>
+                {
+                    options.UseNpgsqlConnection(connectionString);
+                });
+            });
             
+            builder.Services.AddHangfireServer();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddApplicationServices();
+            builder.Services.AddScoped<IEmailJobScheduler,HangfireEmailJobScheduler>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
@@ -50,7 +79,12 @@ namespace Nilearn.API
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseHangfireDashboard("/hangfire");
+            //app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            //{
+            //    IsReadOnlyFunc = (DashboardContext context) => false,
+            //    //Authorization = new[] { new HangfireDashboardAuthFilter() }
+            //});
             app.MapControllers();
 
             app.Run();
