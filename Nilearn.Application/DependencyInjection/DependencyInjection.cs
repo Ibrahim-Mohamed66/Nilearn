@@ -12,7 +12,8 @@ namespace Nilearn.Application.DependencyInjection
             // Register MediatR handlers
             services
                 .AddMediatRService()
-                .AddFluentValidation();
+                .AddFluentValidation()
+                .AddEmailApplicationServices();
 
             return services;
         }

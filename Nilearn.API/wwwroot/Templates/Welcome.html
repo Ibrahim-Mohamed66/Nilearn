@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Nilearn!</title>
+    <style>
+        /* Reset styles */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+        }
+
+        img {
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        table {
+            border-collapse: collapse !important;
+        }
+
+        body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f7fa;
+            color: #333333;
+        }
+        /* Mobile responsive */
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+
+            .content-wrapper {
+                padding: 20px !important;
+            }
+
+            .header {
+                padding: 20px 0 !important;
+            }
+
+            .btn {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: #f4f7fa; margin: 0 !important; padding: 0 !important;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <!-- Header -->
+        <tr>
+            <td align="center" style="padding: 40px 0 20px 0;" class="header">
+                <h1 style="margin: 0; color: #0D3B66; font-size: 32px; font-weight: bold; text-transform: uppercase;">Nil<span style="color: #F4A300;">earn</span></h1>
+            </td>
+        </tr>
+        <!-- Main Content -->
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+                    <!-- Hero Section -->
+                    <tr>
+                        <td align="center" style="background-color: #4CAF50; padding: 40px 20px;">
+                            <h2 style="margin: 0 0 10px 0; color: #ffffff; font-size: 28px; font-weight: bold;">Welcome to the learning journey!</h2>
+                            <p style="margin: 0; color: #ffffff; font-size: 16px; opacity: 0.9;">We're thrilled to have you here.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content-wrapper" style="padding: 40px;">
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">Hi {{displayName}},</p>
+                            <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">
+                                Thank you for joining <strong>Nilearn</strong>! Your account has been successfully set up, and you're ready to dive into our rich array of educational content.
+                            </p>
+
+                            <p style="margin: 0 0 30px 0; font-size: 16px; line-height: 24px;">
+                                Whether you're looking to acquire new skills as a student, or share your knowledge as an instructor, Nilearn is the perfect place to grow.
+                            </p>
+
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{loginLink}}" target="_blank" class="btn" style="display: inline-block; background-color: #0D3B66; color: #ffffff; font-size: 16px; font-weight: bold; text-decoration: none; padding: 15px 30px; border-radius: 6px; border: 1px solid #0D3B66;">Go to Dashboard</a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <h3 style="margin: 0 0 15px 0; color: #0D3B66; font-size: 18px;">What's next?</h3>
+                            <ul style="margin: 0 0 30px 0; padding: 0 0 0 20px; font-size: 16px; line-height: 26px; color: #555555;">
+                                <li>Complete your profile settings</li>
+                                <li>Explore available courses</li>
+                                <li>Connect with other learners and instructors</li>
+                            </ul>
+
+                            <p style="margin: 0; font-size: 16px; line-height: 24px;">
+                                Happy Learning,<br>
+                                <strong>The Nilearn Team</strong>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+            <td align="center" style="padding: 30px 20px;">
+                <p style="margin: 0 0 10px 0; font-size: 14px; color: #888888;">
+                    &copy; {{currentYear}} Nilearn. All rights reserved.
+                </p>
+                <p style="margin: 0; font-size: 12px; color: #aaaaaa;">
+                    You received this email because you registered on Nilearn.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
