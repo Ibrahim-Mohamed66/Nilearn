@@ -14,14 +14,14 @@ namespace Nilearn.Application.Services
         private readonly UserManager<AppUser> _userManager;
         private readonly IEmailTemplateRenderer _templateRenderer;
         private readonly IEmailJobScheduler _emailJobScheduler;
-        private readonly Configuration _config;
+        private readonly AppConfiguration _config;
        
 
         public EmailVerificationService(
             UserManager<AppUser> userManager,
             IEmailTemplateRenderer templateRenderer,
             IEmailJobScheduler emailJobScheduler,
-            Configuration config)
+            AppConfiguration config)
         {
             _userManager = userManager;
             _templateRenderer = templateRenderer;

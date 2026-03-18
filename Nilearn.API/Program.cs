@@ -20,9 +20,9 @@ namespace Nilearn.API
 
             // Add services to the container.
 
-            builder.Services.Configure<Configuration>(builder.Configuration.GetSection("AppSettings"));
-            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<Configuration>>().Value);
-            var configuration = builder.Configuration.GetSection("AppSettings").Get<Configuration>();
+            builder.Services.Configure<AppConfiguration>(builder.Configuration.GetSection("AppSettings"));
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppConfiguration>>().Value);
+            var configuration = builder.Configuration.GetSection("AppSettings").Get<AppConfiguration>();
 
             builder.Host.UseSerilog((hostingContext, services,configuration) =>
             {
