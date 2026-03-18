@@ -10,6 +10,7 @@ namespace Nilearn.Infrastructure.Repositories
         private IDbContextTransaction? _transaction;
         private IRefreshTokenRepository? _refreshTokenRepository;
         private IStudentRepository? _studentRepository;
+        private IInstructorRepository? _instructorRepository;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -28,6 +29,14 @@ namespace Nilearn.Infrastructure.Repositories
             get
             {
                 return _studentRepository ??= new StudentRepository(_context);
+            }
+        }
+
+        public IInstructorRepository InstructorRepository
+        {
+            get
+            {
+                return _instructorRepository ??= new InstructorRepositroy(_context);
             }
         }
 

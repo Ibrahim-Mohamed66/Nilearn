@@ -80,11 +80,6 @@ namespace Nilearn.API
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/hangfire");
-            //app.UseHangfireDashboard("/hangfire", new DashboardOptions
-            //{
-            //    IsReadOnlyFunc = (DashboardContext context) => false,
-            //    //Authorization = new[] { new HangfireDashboardAuthFilter() }
-            //});
             app.MapControllers();
 
             app.Run();

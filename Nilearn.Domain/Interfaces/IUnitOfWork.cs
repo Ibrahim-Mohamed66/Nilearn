@@ -4,6 +4,7 @@
     {
         public IRefreshTokenRepository RefreshTokenRepository { get; }
         public IStudentRepository StudentRepository { get; }
+        public IInstructorRepository InstructorRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(CancellationToken cancellationToken = default);
