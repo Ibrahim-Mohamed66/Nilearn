@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Services;
 
@@ -9,6 +9,7 @@ namespace Nilearn.Application.DependencyInjection
         public static IServiceCollection AddEmailApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+            services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
             return services;
         }
     }

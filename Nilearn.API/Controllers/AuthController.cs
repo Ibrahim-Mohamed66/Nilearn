@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.Commands;
 using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.DTOs;
+using Nilearn.Application.Features.Auth.ForgotPassword.Commands;
 using Nilearn.Application.Features.Auth.Login.Commands;
 using Nilearn.Application.Features.Auth.Login.DTOs;
 using Nilearn.Application.Features.Auth.Logout.Commands;
@@ -102,6 +103,15 @@ namespace Nilearn.API.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
+            return Ok(result);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] string email, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new ForgotPasswordCommand(email), cancellationToken);
+            if (!result.Success)
+                return BadRequest(result);
             return Ok(result);
         }
 
