@@ -7,6 +7,8 @@ using Nilearn.Application.Features.Auth.Login.Commands;
 using Nilearn.Application.Features.Auth.Login.DTOs;
 using Nilearn.Application.Features.Auth.Logout.Commands;
 using Nilearn.Application.Features.Auth.RefreshToken.Command;
+using Nilearn.Application.Features.Auth.Register.Instructor.Commands;
+using Nilearn.Application.Features.Auth.Register.Instructor.DTOs;
 using Nilearn.Application.Features.Auth.Register.Student.Commands;
 using Nilearn.Application.Features.Auth.Register.Student.DTOs;
 
@@ -32,6 +34,14 @@ namespace Nilearn.API.Controllers
 
             SetRefreshTokenCookie(result.Data.RefreshToken, result.Data.ExpiresAt);
             //SetAccessTokenCookie(result.Data.AccessToken);
+            return Ok(result);
+        }
+        [HttpPost("register/instructor")]
+        public async Task<IActionResult> RegisterInstructor([FromBody] InstructorRequestDto instructorRequestDto, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new RegisterInstructorCommand(instructorRequestDto), cancellationToken);
+            if (!result.Success)
+                return BadRequest(result);
             return Ok(result);
         }
 
