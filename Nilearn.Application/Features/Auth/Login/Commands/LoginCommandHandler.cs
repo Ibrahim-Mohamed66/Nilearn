@@ -12,7 +12,7 @@ using System.Data;
 
 namespace Nilearn.Application.Features.Auth.Login.Commands
 {
-    public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginResponseDto>>
+    internal sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginResponseDto>>
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IJwtService _tokenService;
@@ -39,9 +39,20 @@ namespace Nilearn.Application.Features.Auth.Login.Commands
             var passwordValid = await _userManager.CheckPasswordAsync(user, request.loginRequestDto.Password);
             if (!passwordValid)
             {
+                await _userManager.AccessFailedAsync(user);
                 _logger.LogWarning("Login attempt failed for email: {Email}", request.loginRequestDto.Email);
                 return Result<LoginResponseDto>.FailureResponse(new List<string> { "Invalid email or password." }, "Login failed.");
             }
+
+
+            if (!user.EmailConfirmed)
+            {
+                _logger.LogWarning("Login attempt for unconfirmed email: {Email}", request.loginRequestDto.Email);
+                return Result<LoginResponseDto>.FailureResponse(new List<string> { "Email not confirmed. Please check your inbox." }, "Login failed.");
+            }
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+
 
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = _tokenService.GenerateAccessToken(user, roles.ToArray());
