@@ -19,12 +19,14 @@ namespace Nilearn.Infrastructure.Persistence
         public DbSet<Student> Students { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<Category> Categories { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new AppUserConfiguration());
             builder.ApplyConfiguration(new StudentConfiguration());
             builder.ApplyConfiguration(new InstructorConfiguration());
+            builder.ApplyConfiguration(new CategoryConfiguration());
         }
     }
 }
