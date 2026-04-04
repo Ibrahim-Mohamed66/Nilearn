@@ -11,6 +11,7 @@ namespace Nilearn.Infrastructure.Repositories
         private IRefreshTokenRepository? _refreshTokenRepository;
         private IStudentRepository? _studentRepository;
         private IInstructorRepository? _instructorRepository;
+        private ICategoryRepository? _categoryRepository;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -37,6 +38,13 @@ namespace Nilearn.Infrastructure.Repositories
             get
             {
                 return _instructorRepository ??= new InstructorRepositroy(_context);
+            }
+        }
+        public ICategoryRepository CategoryRepository
+        {
+            get
+            {
+                return _categoryRepository ??= new CategoryRepository(_context);
             }
         }
 
