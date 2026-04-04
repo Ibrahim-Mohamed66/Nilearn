@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.Commands;
 using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.DTOs;
 using Nilearn.Application.Features.Auth.ForgotPassword.Commands;
+using Nilearn.Application.Features.Auth.ForgotPassword.DTOs;
 using Nilearn.Application.Features.Auth.Login.Commands;
 using Nilearn.Application.Features.Auth.Login.DTOs;
 using Nilearn.Application.Features.Auth.Logout.Commands;
@@ -12,6 +13,8 @@ using Nilearn.Application.Features.Auth.Register.Instructor.Commands;
 using Nilearn.Application.Features.Auth.Register.Instructor.DTOs;
 using Nilearn.Application.Features.Auth.Register.Student.Commands;
 using Nilearn.Application.Features.Auth.Register.Student.DTOs;
+using Nilearn.Application.Features.Auth.ResetPassword.Commands;
+using Nilearn.Application.Features.Auth.ResetPassword.DTOs;
 
 namespace Nilearn.API.Controllers
 {
@@ -107,9 +110,18 @@ namespace Nilearn.API.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] string email, CancellationToken cancellationToken)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new ForgotPasswordCommand(email), cancellationToken);
+            var result = await _mediator.Send(new ForgotPasswordCommand(request.Email), cancellationToken);
+            if (!result.Success)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(new ResetPasswordCommand(request.Email, request.Token, request.NewPassword), cancellationToken);
             if (!result.Success)
                 return BadRequest(result);
             return Ok(result);

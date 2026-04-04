@@ -59,18 +59,16 @@ namespace Nilearn.Application.Services
                 );
 
                 _logger.LogInformation(
-                    "Password reset email successfully queued for user {Email} at {Time}",
-                    user.Email,
-                    DateTime.UtcNow
+                    "Password reset email successfully queued for user {Email}",
+                    user.Email
                 );
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     ex,
-                    "Failed to queue password reset email for user {Email} at {Time}",
-                    user.Email,
-                    DateTime.UtcNow
+                    "Failed to queue password reset email for user {Email}",
+                    user.Email
                 );
                 throw;
             }
@@ -101,9 +99,8 @@ namespace Nilearn.Application.Services
             {
                 var errors = string.Join(", ", result.Errors);
                 _logger.LogWarning(
-                    "Password reset failed for user {Email} at {Time}. Errors: {Errors}",
+                    "Password reset failed for user {Email}. Errors: {Errors}",
                     email,
-                    DateTime.UtcNow,
                     errors
                 );
                 return ResetPasswordResult.InvalidToken;
