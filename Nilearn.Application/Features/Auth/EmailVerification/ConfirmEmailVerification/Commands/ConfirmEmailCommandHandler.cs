@@ -27,8 +27,8 @@ namespace Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerifi
 
         public async Task<Result<string>> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
-            var userId = request.emailRequestDto.UserId;
-            var token = request.emailRequestDto.Token;
+            var userId = request.UserId;
+            var token = request.Token;
 
             var result = await _emailVerificationService.ConfirmEmailAsync(userId, token, cancellationToken);
 

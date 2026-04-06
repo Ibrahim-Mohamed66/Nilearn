@@ -2,19 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.Commands;
-using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.DTOs;
 using Nilearn.Application.Features.Auth.ForgotPassword.Commands;
-using Nilearn.Application.Features.Auth.ForgotPassword.DTOs;
 using Nilearn.Application.Features.Auth.Login.Commands;
-using Nilearn.Application.Features.Auth.Login.DTOs;
 using Nilearn.Application.Features.Auth.Logout.Commands;
 using Nilearn.Application.Features.Auth.RefreshToken.Command;
 using Nilearn.Application.Features.Auth.Register.Instructor.Commands;
-using Nilearn.Application.Features.Auth.Register.Instructor.DTOs;
 using Nilearn.Application.Features.Auth.Register.Student.Commands;
-using Nilearn.Application.Features.Auth.Register.Student.DTOs;
 using Nilearn.Application.Features.Auth.ResetPassword.Commands;
-using Nilearn.Application.Features.Auth.ResetPassword.DTOs;
 
 namespace Nilearn.API.Controllers
 {
@@ -29,9 +23,9 @@ namespace Nilearn.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto,CancellationToken cancellationToken)
+        public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new LoginCommand(loginRequestDto), cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Success)
                 return Unauthorized(result);
@@ -41,18 +35,18 @@ namespace Nilearn.API.Controllers
             return Ok(result);
         }
         [HttpPost("register/instructor")]
-        public async Task<IActionResult> RegisterInstructor([FromBody] InstructorRequestDto instructorRequestDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> RegisterInstructor([FromBody] RegisterInstructorCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new RegisterInstructorCommand(instructorRequestDto), cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
             if (!result.Success)
                 return BadRequest(result);
             return Ok(result);
         }
 
         [HttpPost("register/student")]
-        public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentRequestDto registerStudentRequestDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new RegisterStudentCommand(registerStudentRequestDto), cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -99,9 +93,9 @@ namespace Nilearn.API.Controllers
         }
 
         [HttpGet("email/confirm")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new ConfirmEmailCommand(request), cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (!result.Success)
                 return BadRequest(result);
@@ -110,18 +104,18 @@ namespace Nilearn.API.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new ForgotPasswordCommand(request.Email), cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
             if (!result.Success)
                 return BadRequest(result);
             return Ok(result);
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new ResetPasswordCommand(request.Email, request.Token, request.NewPassword), cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
             if (!result.Success)
                 return BadRequest(result);
             return Ok(result);

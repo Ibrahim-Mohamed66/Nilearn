@@ -33,24 +33,24 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
 
         public async Task<Result<string>> Handle(RegisterStudentCommand request, CancellationToken cancellationToken)
         {
-            if (await _userManager.FindByEmailAsync(request.registerRequestDto.Email) != null)
+            if (await _userManager.FindByEmailAsync(request.Email) != null)
             {
-                _logger.LogWarning("Registration failed: email {Email} is already in use.", request.registerRequestDto.Email);
+                _logger.LogWarning("Registration failed: email {Email} is already in use.", request.Email);
                 return Result<string>.FailureResponse(
                     new List<string> { "Email is already in use." }, "Email is already in use.");
             }
 
             var user = new AppUser
             {
-                UserName = request.registerRequestDto.Email,
-                Email = request.registerRequestDto.Email,
-                FirstName = request.registerRequestDto.FirstName,
-                LastName = request.registerRequestDto.LastName,
-                DateOfBirth = request.registerRequestDto.DateOfBirth,
+                UserName = request.Email,
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                DateOfBirth = request.DateOfBirth,
                 CreatedAt = DateTime.UtcNow
             };
 
-            var result = await _userManager.CreateAsync(user, request.registerRequestDto.Password);
+            var result = await _userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
             {
                 _logger.LogWarning("Registration failed for {Email}: {Errors}",
@@ -62,8 +62,8 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
             var studentProfile = new Nilearn.Domain.Entities.Student
             {
                 AppUserId = user.Id,
-                CurrentLevel = request.registerRequestDto.CurrentLevel,
-                StudentNumber = request.registerRequestDto.StudentNumber
+                CurrentLevel = request.CurrentLevel,
+                StudentNumber = request.StudentNumber
             };
 
             try

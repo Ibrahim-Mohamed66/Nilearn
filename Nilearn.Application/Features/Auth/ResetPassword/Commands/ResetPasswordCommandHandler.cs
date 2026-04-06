@@ -24,21 +24,21 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
         {
             try
             {
-                var decodedToken = Uri.UnescapeDataString(request.token);
+                var decodedToken = Uri.UnescapeDataString(request.Token);
 
                 var result = await _forgotPasswordService.ResetPasswordAsync(
-                    request.email,
+                    request.Email,
                     decodedToken,
-                    request.newPassword,
+                    request.NewPassword,
                     cancellationToken
                 );
 
                 return result switch
                 {
-                    ResetPasswordResult.Success => HandleSuccess(request.email),
-                    ResetPasswordResult.UserNotFound => HandleUserNotFound(request.email),
-                    ResetPasswordResult.InvalidToken => HandleInvalidToken(request.email),
-                    _ => HandleUnknownError(request.email)
+                    ResetPasswordResult.Success => HandleSuccess(request.Email),
+                    ResetPasswordResult.UserNotFound => HandleUserNotFound(request.Email),
+                    ResetPasswordResult.InvalidToken => HandleInvalidToken(request.Email),
+                    _ => HandleUnknownError(request.Email)
                 };
             }
             catch (Exception ex)
@@ -46,7 +46,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
                 _logger.LogError(
                     ex,
                     "Unexpected error while resetting password for {Email}",
-                    request.email
+                    request.Email
                 );
 
                 return Result<string>.FailureResponse(

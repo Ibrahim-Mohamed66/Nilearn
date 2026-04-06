@@ -9,10 +9,10 @@ namespace Nilearn.Application.Features.Auth.Login.Commands
     {
         public LoginCommandValidator()
         {
-            RuleFor(x => x.loginRequestDto.Email)
+            RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Invalid email format.");
-            RuleFor(x => x.loginRequestDto.Password)
+            RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Password is required.")
                 .MinimumLength(6).WithMessage("Password must be at least 8 characters long.");
         }

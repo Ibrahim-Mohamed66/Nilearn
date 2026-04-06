@@ -2,5 +2,6 @@
 using Nilearn.Application.Common;
 
 namespace Nilearn.Application.Features.Auth.ResetPassword.Commands;
-public record ResetPasswordCommand( string email, string token, string newPassword) : IRequest<Result<string>>;
+
+public sealed record ResetPasswordCommand(string Email, string Token, string NewPassword) : IRequest<Result<string>>;
 

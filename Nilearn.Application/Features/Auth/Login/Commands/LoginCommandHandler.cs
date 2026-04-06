@@ -29,25 +29,25 @@ namespace Nilearn.Application.Features.Auth.Login.Commands
         {
            var user = await _userManager.Users
                 .Include(u => u.RefreshTokens)
-                .FirstOrDefaultAsync(u => u.Email == request.loginRequestDto.Email, cancellationToken);
+                .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
             if (user == null)
             {
-                _logger.LogWarning("Login attempt failed for email: {Email}", request.loginRequestDto.Email);
+                _logger.LogWarning("Login attempt failed for email: {Email}", request.Email);
                 return Result<LoginResponseDto>.FailureResponse(new List<string> { "Invalid email or password." }, "Login failed.");
             }
             
-            var passwordValid = await _userManager.CheckPasswordAsync(user, request.loginRequestDto.Password);
+            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!passwordValid)
             {
                 await _userManager.AccessFailedAsync(user);
-                _logger.LogWarning("Login attempt failed for email: {Email}", request.loginRequestDto.Email);
+                _logger.LogWarning("Login attempt failed for email: {Email}", request.Email);
                 return Result<LoginResponseDto>.FailureResponse(new List<string> { "Invalid email or password." }, "Login failed.");
             }
 
 
             if (!user.EmailConfirmed)
             {
-                _logger.LogWarning("Login attempt for unconfirmed email: {Email}", request.loginRequestDto.Email);
+                _logger.LogWarning("Login attempt for unconfirmed email: {Email}", request.Email);
                 return Result<LoginResponseDto>.FailureResponse(new List<string> { "Email not confirmed. Please check your inbox." }, "Login failed.");
             }
             await _userManager.ResetAccessFailedCountAsync(user);

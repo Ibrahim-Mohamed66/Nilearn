@@ -30,23 +30,23 @@ namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
 
         public async Task<Result<string>> Handle(RegisterInstructorCommand request, CancellationToken cancellationToken)
         {
-            if (await _userManager.FindByEmailAsync(request.InstructorRequestDto.Email) != null)
+            if (await _userManager.FindByEmailAsync(request.Email) != null)
             {
-                _logger.LogWarning("Registration failed: email {Email} is already in use.", request.InstructorRequestDto.Email);
+                _logger.LogWarning("Registration failed: email {Email} is already in use.", request.Email);
                 return Result<string>.FailureResponse(
                     new List<string> { "Email is already in use." }, "Email is already in use.");
             }
 
             var user = new AppUser
             {
-                UserName = request.InstructorRequestDto.Email,
-                Email = request.InstructorRequestDto.Email,
-                FirstName = request.InstructorRequestDto.FirstName,
-                LastName = request.InstructorRequestDto.LastName,
-                PhoneNumber = request.InstructorRequestDto.PhoneNumber
+                UserName = request.Email,
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber
             };
 
-            var result = await _userManager.CreateAsync(user, request.InstructorRequestDto.Password);
+            var result = await _userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
             {
                 _logger.LogWarning("Registration failed for {Email}: {Errors}",
@@ -58,9 +58,9 @@ namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
             var instructorProfile = new Nilearn.Domain.Entities.Instructor
             {
                 AppUserId = user.Id,
-                Bio = request.InstructorRequestDto.Bio,
-                Headline = request.InstructorRequestDto.Headline,
-                WebsiteUrl = request.InstructorRequestDto.WebsiteUrl,
+                Bio = request.Bio,
+                Headline = request.Headline,
+                WebsiteUrl = request.WebsiteUrl,
             };
             try
             {
