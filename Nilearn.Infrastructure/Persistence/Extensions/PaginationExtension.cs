@@ -6,17 +6,15 @@ namespace Nilearn.Infrastructure.Persistence.Extensions
 {
     public static class PaginationExtension
     {
-        public static async Task<PagedResponse<T>> ToPagedAsync<T>(
-       this IQueryable<T> query,
-       int pageNumber,
-       int pageSize)
+        public static async Task<PagedResponse<T>> ToPagedAsync<T>(this IQueryable<T> query,int pageNumber,int pageSize,
+            CancellationToken cancellationToken = default)
         {
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
 
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new PagedResponse<T>
             {

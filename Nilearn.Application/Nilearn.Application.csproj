@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Nilearn.Shared\Nilearn.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Category\Queries\" />
+  </ItemGroup>
+
 </Project>

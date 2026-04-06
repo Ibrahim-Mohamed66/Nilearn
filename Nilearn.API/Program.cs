@@ -7,6 +7,7 @@ using Nilearn.API.Hangfire.Jobs;
 using Nilearn.API.Middlewares;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.DependencyInjection;
+using Nilearn.Domain.Enums;
 using Nilearn.Infrastructure.DependencyInjection;
 using Nilearn.Shared.Models;
 using Serilog;
@@ -31,6 +32,14 @@ namespace Nilearn.API
                 .Enrich.FromLogContext()
                 .ReadFrom.Services(services);
 
+            });
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.RequireRole(Role.Admin.ToString()));
+
+                options.AddPolicy("AdminOrInstructor", policy =>
+                    policy.RequireRole(Role.Admin.ToString(), Role.SuperAdmin.ToString(), Role.Instructor.ToString()));
             });
             builder.Services.AddCors(options =>
             {
