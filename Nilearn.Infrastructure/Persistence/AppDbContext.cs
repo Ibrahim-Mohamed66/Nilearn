@@ -20,6 +20,7 @@ namespace Nilearn.Infrastructure.Persistence
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Course> Courses { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -27,6 +28,7 @@ namespace Nilearn.Infrastructure.Persistence
             builder.ApplyConfiguration(new StudentConfiguration());
             builder.ApplyConfiguration(new InstructorConfiguration());
             builder.ApplyConfiguration(new CategoryConfiguration());
+            builder.ApplyConfiguration(new CourseConfiguration());
         }
     }
 }
