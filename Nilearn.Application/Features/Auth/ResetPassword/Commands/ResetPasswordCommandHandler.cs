@@ -50,7 +50,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
                 );
 
                 return Result<string>.FailureResponse(
-                    new List<string> { "An unexpected error occurred. Please try again later." }
+                    message: "An unexpected error occurred. Please try again later."
                 );
             }
         }
@@ -63,7 +63,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
                 email
             );
 
-            return Result<string>.SuccessResponse("Password has been reset successfully.");
+            return Result<string>.SuccessResponse(message: "Password has been reset successfully.");
         }
 
         private Result<string> HandleUserNotFound(string email)
@@ -74,7 +74,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
             );
 
             // Don't reveal user existence
-            return Result<string>.SuccessResponse("Password has been reset successfully.");
+            return Result<string>.SuccessResponse(message: "Password has been reset successfully.");
         }
 
         private Result<string> HandleInvalidToken(string email)
@@ -85,7 +85,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
             );
 
             return Result<string>.FailureResponse(
-                new List<string> { "Invalid or expired reset token." }
+                message: "Invalid or expired reset token."
             );
         }
 
@@ -97,7 +97,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
             );
 
             return Result<string>.FailureResponse(
-                new List<string> { "Something went wrong. Please try again later." }
+                message: "Something went wrong. Please try again later."
             );
         } 
         #endregion

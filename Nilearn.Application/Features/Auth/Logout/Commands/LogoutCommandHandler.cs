@@ -21,6 +21,6 @@ public sealed class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result
        
         await _unitOfWork.RefreshTokenRepository.RevokeRefreshTokenAsync(request.token,cancellationToken);
         _logger.LogInformation("Refresh token {Token} revoked", request.token);
-        return Result<string>.SuccessResponse("Logout successful");
+        return Result<string>.SuccessResponse(message: "Logout successful");
     }
 }

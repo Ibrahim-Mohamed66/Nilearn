@@ -2,7 +2,7 @@
 
 namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
 {
-    internal sealed class RegisterInstructorCommandValidator : AbstractValidator<RegisterInstructorCommand>
+    public sealed class RegisterInstructorCommandValidator : AbstractValidator<RegisterInstructorCommand>
     {
         public RegisterInstructorCommandValidator() 
         {
@@ -17,7 +17,7 @@ namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
                 .EmailAddress().WithMessage("Invalid email format.");
             RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Password is required.")
-                .MinimumLength(6).WithMessage("Password must be at least 6 characters long.");
+                .MinimumLength(8).WithMessage("Password must be at least 8 characters long.");
             RuleFor(x => x.ConfirmPassword)
                 .Equal(x => x.Password).WithMessage("Passwords do not match.");
             RuleFor(x => x.DateOfBirth)

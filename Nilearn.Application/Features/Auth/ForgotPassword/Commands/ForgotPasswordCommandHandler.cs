@@ -37,7 +37,7 @@ namespace Nilearn.Application.Features.Auth.ForgotPassword.Commands
                 );
 
                 return Result<string>.SuccessResponse(
-                    "If the email exists, a reset link has been sent."
+                   message: "If the email exists, a reset link has been sent."
                 );
             }
 
@@ -51,7 +51,7 @@ namespace Nilearn.Application.Features.Auth.ForgotPassword.Commands
                     DateTime.UtcNow
                 );
 
-                return Result<string>.SuccessResponse(
+                return Result<string>.SuccessResponse( message:
                     "If the email exists, a reset link has been sent."
                 );
             }
@@ -65,7 +65,7 @@ namespace Nilearn.Application.Features.Auth.ForgotPassword.Commands
                 );
 
                 return Result<string>.FailureResponse(
-                    new List<string> { "An error occurred while processing your request. Please try again later." }
+                    message: "An error occurred while processing your request. Please try again later."
                 );
             }
         }

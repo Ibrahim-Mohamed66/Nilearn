@@ -34,7 +34,7 @@ namespace Nilearn.API.Controllers
             //SetAccessTokenCookie(result.Data.AccessToken);
             return Ok(result);
         }
-        [HttpPost("register/instructor")]
+        [HttpPost("register-instructor")]
         public async Task<IActionResult> RegisterInstructor([FromBody] RegisterInstructorCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
@@ -43,7 +43,7 @@ namespace Nilearn.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("register/student")]
+        [HttpPost("register-student")]
         public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
@@ -58,7 +58,7 @@ namespace Nilearn.API.Controllers
         public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
         {
             if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
-                return BadRequest(new { Message = "Refresh token is missing." });
+                return BadRequest(new { Message = "Session has expired." });
 
             var result = await _mediator.Send(new RefreshTokenCommand(refreshToken), cancellationToken);
 
@@ -92,7 +92,7 @@ namespace Nilearn.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("email/confirm")]
+        [HttpGet("email-confirm")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);

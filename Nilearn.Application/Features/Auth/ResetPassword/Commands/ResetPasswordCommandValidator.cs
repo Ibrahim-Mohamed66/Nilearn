@@ -2,7 +2,7 @@
 
 namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
 {
-    internal sealed class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
+    public sealed class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
     {
         public ResetPasswordCommandValidator()
         {
