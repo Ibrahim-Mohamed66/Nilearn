@@ -6,7 +6,7 @@ public class Course : BaseEntity
     public string Slug { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
-    public string? ThumbnailUrl { get; set; }
+    public string? ThumbnailPublicId { get; set; }
 
     public decimal Price { get; set; }
     public bool IsPublished { get; private set; } = false;
@@ -15,8 +15,8 @@ public class Course : BaseEntity
     public int CategoryId { get; set; }
     public int InstructorId { get; set; }
 
-    public Category Category { get; set; } = null!;
-    public Instructor Instructor { get; set; } = null!;
+    public Category? Category { get; set; }
+    public Instructor? Instructor { get; set; }
 
     public void Publish()
     {
@@ -24,6 +24,7 @@ public class Course : BaseEntity
         IsPublished = true;
         PublishedAt = DateTime.UtcNow;
     }
+
     public void Unpublish()
     {
         if (!IsPublished) return;

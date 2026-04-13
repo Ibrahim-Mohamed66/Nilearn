@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Nilearn.Application.Common.Extensions;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
-using Nilearn.Infrastructure.Persistence.Extensions;
 using Nilearn.Shared.Models;
 
 namespace Nilearn.Infrastructure.Repositories;
@@ -32,25 +33,48 @@ internal class CourseRepository : ICourseRepository
 
     public IQueryable<Course> GetAllCourses()
     {
-        return _context.Courses.Where(c => !c.IsDeleted);
+        return _context.Courses.AsNoTracking().Where(c => !c.IsDeleted);
     }
 
     public async Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Courses.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
     }
-
-    public async Task<PagedResponse<Course>> GetPagedCoursesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    public IQueryable<Course> GetCoursesByInstructorId(int instructorId)
+    {
+        return _context.Courses
+            .AsNoTracking()
+            .Where(c => c.InstructorId == instructorId && !c.IsDeleted)
+            .Include(c => c.Category)
+            .Include(c => c.Instructor)
+                .ThenInclude(i => i.User);
+    }
+    
+    public async Task<Course?> GetCourseByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Courses
-             .AsNoTracking()
-             .Where(c => !c.IsDeleted)
-             .OrderBy(c => c.Title)
-             .ToPagedAsync(pageNumber, pageSize, cancellationToken);
+            .AsNoTracking()
+            .Include(c => c.Category)
+            .Include(c => c.Instructor)
+                .ThenInclude(i => i.User)
+            .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
     }
 
     public void UpdateCourse(Course course)
     {
         _context.Courses.Update(course);
     }
-}
+
+    public async Task<PagedResponse<Course>> GetPagedCoursesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Courses
+            .AsNoTracking()
+            .Where(c => !c.IsDeleted)
+            .Include(c => c.Category)
+            .Include(c => c.Instructor)
+                .ThenInclude(i => i.User);
+
+        return await query.ToPagedAsync(pageNumber, pageSize, cancellationToken);
+    }
+
+   }

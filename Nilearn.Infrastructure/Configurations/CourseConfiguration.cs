@@ -25,7 +25,7 @@ internal class CourseConfiguration : IEntityTypeConfiguration<Course>
             .IsRequired()
             .HasMaxLength(2000);
 
-        builder.Property(x => x.ThumbnailUrl)
+        builder.Property(x => x.ThumbnailPublicId)
             .HasMaxLength(500);
 
         builder.Property(x => x.Price)
