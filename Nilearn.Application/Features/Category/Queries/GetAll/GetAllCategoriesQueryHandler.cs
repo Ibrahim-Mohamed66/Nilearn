@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Extensions;
 using Nilearn.Application.Features.Category.DTOs;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Shared.Models;
@@ -25,8 +26,8 @@ internal sealed class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCateg
         try
         {
             // Fetch paged categories from repository
-            var pagedCategories = await _unitOfWork.CategoryRepository
-                .GetPagedCategoriesAsync(request.PageNumber, request.PageSize, cancellationToken);
+            var categories = _unitOfWork.CategoryRepository.GetAllCategories();
+            var pagedCategories = await categories.ToPagedAsync(request.PageNumber, request.PageSize, cancellationToken);
 
             // Map to DTOs
             var pagedResult = new PagedResponse<CategoryDto>
@@ -49,22 +50,15 @@ internal sealed class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCateg
             _logger.LogInformation("Successfully retrieved {Count} categories out of {TotalCount}"
                 , pagedResult.Items.Count, pagedResult.TotalCount);
 
-            return new Result<PagedResponse<CategoryDto>>
-            {
-                Success = true,
-                Data = pagedResult
-            };
+            return  Result<PagedResponse<CategoryDto>>.SuccessResponse(pagedResult, "Categories retrieved successfully");
+
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching categories for page {Page} with size {Size}", 
                 request.PageNumber, request.PageSize);
 
-            return new Result<PagedResponse<CategoryDto>>
-            {
-                Success = false,
-                Message = "Failed to fetch categories. Please try again later."
-            };
+            return  Result<PagedResponse<CategoryDto>>.FailureResponse(message:"Failed to fetch categories. Please try again later.");
         }
     }
 }

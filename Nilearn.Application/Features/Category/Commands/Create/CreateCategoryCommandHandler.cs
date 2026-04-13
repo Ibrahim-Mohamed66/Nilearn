@@ -41,7 +41,7 @@ internal sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCateg
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category '{Name}' created with success.", category.Name);
-        return Result<string>.SuccessResponse("Category created successfully.");
+        return Result<string>.SuccessResponse(message:"Category created successfully.");
     }
 
 }

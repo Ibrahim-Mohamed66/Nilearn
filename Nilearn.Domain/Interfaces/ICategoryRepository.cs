@@ -1,5 +1,4 @@
 ﻿using Nilearn.Domain.Entities;
-using Nilearn.Shared.Models;
 
 namespace Nilearn.Domain.Interfaces
 {
@@ -11,7 +10,7 @@ namespace Nilearn.Domain.Interfaces
         Task<Category?> GetCategoryByIdAsync(int id,CancellationToken cancellationToken = default);
         Task<Category?> GetCategoryByNameAsync(string name,CancellationToken cancellationToken = default);
         IQueryable<Category> GetAllCategories();
-        Task<PagedResponse<Category>> GetPagedCategoriesAsync(int pageNumber, int pageSize,CancellationToken cancellationToken=default);
+       
 
     }
 }

@@ -2,8 +2,6 @@
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
-using Nilearn.Infrastructure.Persistence.Extensions;
-using Nilearn.Shared.Models;
 
 namespace Nilearn.Infrastructure.Repositories;
 
@@ -39,15 +37,7 @@ internal class CategoryRepository : ICategoryRepository
             .Where(c => !c.IsDeleted)
             .AsNoTracking();
     }
-    public async Task<PagedResponse<Category>> GetPagedCategoriesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
-    {
-        
-        return await _context.Categories
-            .AsNoTracking()    
-            .Where(c => !c.IsDeleted)
-            .OrderBy(c => c.Name) 
-            .ToPagedAsync(pageNumber, pageSize,cancellationToken);
-    }
+    
 
 
     public async Task<Category?> GetCategoryByIdAsync(int id, CancellationToken cancellationToken = default)

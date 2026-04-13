@@ -39,6 +39,6 @@ internal sealed class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryB
         };
 
         _logger.LogInformation("Category '{Name}' retrieved successfully.", category.Name);
-        return Result<CategoryDto>.SuccessResponse(dto);
+        return Result<CategoryDto>.SuccessResponse(dto, "Category retrieved successfully.");
     }
 }

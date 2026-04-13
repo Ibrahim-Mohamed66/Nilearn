@@ -1,7 +1,6 @@
 using FluentValidation;
-using Nilearn.Application.Features.Category.Queries.GetById;
 
-namespace Nilearn.Application.Features.Category.Validators;
+namespace Nilearn.Application.Features.Category.Queries.GetById;
 
 public class GetCategoryByIdQueryValidator : AbstractValidator<GetCategoryByIdQuery>
 {
