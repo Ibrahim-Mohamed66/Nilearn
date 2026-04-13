@@ -40,6 +40,9 @@ namespace Nilearn.API
 
                 options.AddPolicy("AdminOrInstructor", policy =>
                     policy.RequireRole(Role.Admin.ToString(), Role.SuperAdmin.ToString(), Role.Instructor.ToString()));
+
+                options.AddPolicy("InstructorOnly", policy =>
+                    policy.RequireRole(Role.Instructor.ToString()));
             });
             builder.Services.AddCors(options =>
             {
@@ -70,6 +73,7 @@ namespace Nilearn.API
             builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddApplicationServices();
             builder.Services.AddScoped<IEmailJobScheduler,HangfireEmailJobScheduler>();
+            builder.Services.AddScoped<IImageJobScheduler, ImageJobScheduler>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();

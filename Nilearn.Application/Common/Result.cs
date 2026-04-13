@@ -8,7 +8,7 @@
         public List<string>? Errors { get; set; }
 
         // Success response
-        public static Result<T> SuccessResponse(T data, string message = "")
+        public static Result<T> SuccessResponse(T data = null, string message = "")
         {
             return new Result<T>
             {
@@ -19,7 +19,7 @@
         }
 
         // Failure response
-        public static Result<T> FailureResponse(List<string> errors, string message = "")
+        public static Result<T> FailureResponse(List<string> errors = null, string message = "")
         {
             return new Result<T>
             {

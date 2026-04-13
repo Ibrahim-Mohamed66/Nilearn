@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Nilearn.Application.Common.Behaviors;
 
 namespace Nilearn.Application.DependencyInjection
 {
@@ -12,6 +11,7 @@ namespace Nilearn.Application.DependencyInjection
             services.AddMediatR(options =>
             {
                 options.RegisterServicesFromAssemblies(typeof(ApplicationAssemblyMarker).Assembly);
+
             });
             return services;
         }

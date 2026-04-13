@@ -1,5 +1,6 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
+using Nilearn.Application.Common.Exceptions;
 
 namespace Nilearn.API.Middlewares
 {
@@ -17,6 +18,23 @@ namespace Nilearn.API.Middlewares
             try
             {
                 await _next(context);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning("Validation failed: {Errors}", string.Join("; ", ex.Errors));
+
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Response.ContentType = "application/json";
+
+                var response = new
+                {
+                    success = false,
+                    message = "Validation failed",
+                    errors = ex.Errors
+                };
+
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
             }
             catch (Exception ex)
             {
@@ -36,8 +54,5 @@ namespace Nilearn.API.Middlewares
                 await context.Response.WriteAsync(json);
             }
         }
-
-
-
     }
 }
