@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Extensions;
@@ -26,7 +26,7 @@ internal sealed class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCateg
         try
         {
             // Fetch paged categories from repository
-            var categories = _unitOfWork.CategoryRepository.GetAllCategories();
+            var categories = _unitOfWork.CategoryRepository.GetAll();
             var pagedCategories = await categories.ToPagedAsync(request.PageNumber, request.PageSize, cancellationToken);
 
             // Map to DTOs

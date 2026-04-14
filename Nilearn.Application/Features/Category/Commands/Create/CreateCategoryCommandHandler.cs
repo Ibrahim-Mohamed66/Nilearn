@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Domain.Interfaces;
@@ -20,7 +20,7 @@ internal sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCateg
     public async Task<Result<string>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating category with name: {Name}", request.Name);
-        var existing = await _unitOfWork.CategoryRepository.GetCategoryByNameAsync(request.Name, cancellationToken);
+        var existing = await _unitOfWork.CategoryRepository.GetByNameAsync(request.Name, cancellationToken);
         if(existing != null)
         {
             _logger.LogWarning("Category with name '{Name}' already exists.", request.Name);
@@ -37,7 +37,7 @@ internal sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCateg
 
         };
 
-        await _unitOfWork.CategoryRepository.AddCategoryAsync(category, cancellationToken);
+        await _unitOfWork.CategoryRepository.AddAsync(category, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category '{Name}' created with success.", category.Name);

@@ -21,7 +21,7 @@ internal sealed class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryB
     {
         _logger.LogInformation("Fetching category with id: {Id}", request.Id);
 
-        var category = await _unitOfWork.CategoryRepository.GetCategoryByIdAsync(request.Id, cancellationToken);
+        var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category is null)
         {
             return Result<CategoryDto>.FailureResponse(

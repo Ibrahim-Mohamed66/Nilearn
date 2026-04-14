@@ -29,7 +29,7 @@ internal sealed class GetCourseByIdQueryHandler
         _logger.LogInformation("Fetching course with ID: {CourseId}", request.Id);
 
         var course = await _unitOfWork.CourseRepository
-            .GetCourseByIdWithDetailsAsync(request.Id, cancellationToken);
+            .GetByIdWithDetailsAsync(request.Id, cancellationToken);
 
         if (course is null)
         {

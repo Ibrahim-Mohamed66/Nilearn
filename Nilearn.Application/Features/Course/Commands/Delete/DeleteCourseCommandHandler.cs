@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Interfaces;
@@ -24,8 +24,8 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
 
     public async Task<Result<string>> Handle(DeleteCourseCommand request, CancellationToken cancellationToken)
     {
-        var instructorId = await _unitOfWork.InstructorRepository.GetInstructorIdByUserIdAsync(request.UserId);
-        var course = await _unitOfWork.CourseRepository.GetCourseByIdAsync(request.Id,cancellationToken);
+        var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId);
+        var course = await _unitOfWork.CourseRepository.GetByIdAsync(request.Id,cancellationToken);
 
         
 
@@ -58,7 +58,12 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
             throw;
         }
 
-        await _unitOfWork.CourseRepository.DeleteCourseAsync(course.Id, cancellationToken);
+        var deleted = await _unitOfWork.CourseRepository.DeleteAsync(course.Id, cancellationToken);
+        if (!deleted)
+        {
+            return Result<string>.FailureResponse(message: "Failed to delete course.");
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Deleted course with ID {CourseId} from database.", request.Id);
         return Result<string>.SuccessResponse(message: "Course deleted successfully.");

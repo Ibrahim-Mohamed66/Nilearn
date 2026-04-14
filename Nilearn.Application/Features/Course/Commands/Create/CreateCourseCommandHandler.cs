@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Interfaces;
@@ -43,7 +43,7 @@ internal sealed class CreateCourseCommandHandler : IRequestHandler<CreateCourseC
             _logger.LogError(ex, "Failed to upload thumbnail for course: {Title}", request.Title);
             throw; 
         }
-        var instructorId = await _unitOfWork.InstructorRepository.GetInstructorIdByUserIdAsync(request.UserId, cancellationToken);
+        var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
         if(instructorId == null )
         {
             _logger.LogError("Instructor not found for UserId: {UserId}", request.UserId);
@@ -70,7 +70,7 @@ internal sealed class CreateCourseCommandHandler : IRequestHandler<CreateCourseC
 
         try
         {
-            await _unitOfWork.CourseRepository.AddCourseAsync(course, cancellationToken);
+            await _unitOfWork.CourseRepository.AddAsync(course, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Course created successfully with Id: {CourseId}", course.Id);

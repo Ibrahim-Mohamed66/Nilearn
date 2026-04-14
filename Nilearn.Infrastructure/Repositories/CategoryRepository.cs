@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
@@ -14,12 +14,12 @@ internal class CategoryRepository : ICategoryRepository
         _context = context;
     }
 
-    public async Task AddCategoryAsync(Category category, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Category category, CancellationToken cancellationToken = default)
     {
         await _context.Categories.AddAsync(category, cancellationToken);
     }
 
-    public async Task DeleteCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(int categoryId, CancellationToken cancellationToken = default)
     {
         var category = await _context.Categories
             .FirstOrDefaultAsync(c => c.Id == categoryId && !c.IsDeleted, cancellationToken);
@@ -28,10 +28,12 @@ internal class CategoryRepository : ICategoryRepository
         {
             category.IsDeleted = true;
             category.UpdatedAt = DateTime.UtcNow;
+            return true;
         }
+        return false;
     }
 
-    public IQueryable<Category> GetAllCategories()
+    public IQueryable<Category> GetAll()
     {
         return _context.Categories
             .Where(c => !c.IsDeleted)
@@ -40,22 +42,23 @@ internal class CategoryRepository : ICategoryRepository
     
 
 
-    public async Task<Category?> GetCategoryByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Category?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Categories
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
     }
 
-    public Task<Category?> GetCategoryByNameAsync(string name, CancellationToken cancellationToken = default)
+    public Task<Category?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
        return _context.Categories
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Name == name && !c.IsDeleted, cancellationToken);
     }
 
-    public void UpdateCategory(Category category)
+    public void Update(Category category)
     {
+        category.UpdatedAt = DateTime.UtcNow;
         _context.Categories.Update(category);
     }
 }

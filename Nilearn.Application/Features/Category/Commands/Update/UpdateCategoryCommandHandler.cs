@@ -20,7 +20,7 @@ internal sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCateg
     {
         _logger.LogInformation("Updating category with id: {Id}", request.Id);
 
-        var category = await _unitOfWork.CategoryRepository.GetCategoryByIdAsync(request.Id, cancellationToken);
+        var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category is null)
         {
             return Result<string>.FailureResponse( message:"Category not found.");
@@ -32,7 +32,7 @@ internal sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCateg
         category.IsActive = request.IsActive;
         category.UpdatedAt = DateTime.UtcNow;
 
-        _unitOfWork.CategoryRepository.UpdateCategory(category);
+        _unitOfWork.CategoryRepository.Update(category);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category '{Name}' updated with success.", category.Name);

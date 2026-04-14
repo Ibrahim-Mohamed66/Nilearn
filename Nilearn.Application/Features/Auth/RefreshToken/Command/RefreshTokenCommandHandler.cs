@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
@@ -26,7 +26,7 @@ namespace Nilearn.Application.Features.Auth.RefreshToken.Command
 
         public async Task<Result<LoginResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            var user = await _unitOfWork.RefreshTokenRepository.GetAppUserByTokenAsync(request.RefreshToken);
+            var user = await _unitOfWork.RefreshTokenRepository.GetUserByTokenAsync(request.RefreshToken);
             if (user == null)
             {
                 _logger.LogWarning("Refresh token not found or no user associated with token: {Token}", request.RefreshToken);
@@ -56,7 +56,7 @@ namespace Nilearn.Application.Features.Auth.RefreshToken.Command
             {
                 await _unitOfWork.BeginTransactionAsync(cancellationToken);
                 user.RevokeActiveRefreshTokens();
-                await _unitOfWork.RefreshTokenRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
+                await _unitOfWork.RefreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
 

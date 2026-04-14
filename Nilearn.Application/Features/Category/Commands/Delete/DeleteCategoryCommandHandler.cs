@@ -20,13 +20,13 @@ internal sealed class DeleteCategoryCommandHandler : IRequestHandler<DeleteCateg
     {
         _logger.LogInformation("Deleting category with id: {Id}", request.Id);
 
-        var existing = await _unitOfWork.CategoryRepository.GetCategoryByIdAsync(request.Id, cancellationToken);
+        var existing = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (existing is null)
         {
             return Result<string>.FailureResponse(message:"Category not found." );
         }
 
-        await _unitOfWork.CategoryRepository.DeleteCategoryAsync(request.Id, cancellationToken);
+        await _unitOfWork.CategoryRepository.DeleteAsync(request.Id, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category with id {Id} deleted with success.", request.Id);

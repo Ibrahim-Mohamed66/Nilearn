@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
@@ -23,7 +23,7 @@ namespace Nilearn.Infrastructure.Repositories
             _context.Update(instructor);
         }
 
-        public async Task<int?> GetInstructorIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<int?> GetIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             return await _context.Instructors
                 .Where(i => i.AppUserId.ToString() == userId)

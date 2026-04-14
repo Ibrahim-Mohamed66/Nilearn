@@ -35,7 +35,7 @@ internal sealed class GetCoursePagedQueryHandler
         try
         {
             // Get paged courses from repository
-            var pagedCourses = await _unitOfWork.CourseRepository.GetPagedCoursesAsync(
+            var pagedCourses = await _unitOfWork.CourseRepository.GetPagedAsync(
                 request.PageNumber, request.PageSize, cancellationToken);
 
             // Map to DTOs with projection

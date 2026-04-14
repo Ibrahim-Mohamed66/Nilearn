@@ -29,7 +29,7 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
     {
         _logger.LogInformation("Starting course update: {CourseId}", request.CourseId);
 
-        var course = await _unitOfWork.CourseRepository.GetCourseByIdAsync(request.CourseId, cancellationToken);
+        var course = await _unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
 
         if (course == null)
         {
@@ -37,14 +37,14 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
             return Result<string>.FailureResponse(message: "Course not found.");
         }
 
-        var instructorId = await _unitOfWork.InstructorRepository.GetInstructorIdByUserIdAsync(request.UserId, cancellationToken);
+        var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
         
         if (instructorId == null || course.InstructorId != instructorId.Value)
         {
             _logger.LogWarning("Unauthorized course update attempt by UserId: {UserId} for CourseId: {CourseId}", request.UserId, request.CourseId);
             return Result<string>.FailureResponse(message: "Unauthorized to update this course.");
         }
-        var category = await _unitOfWork.CategoryRepository.GetCategoryByIdAsync(request.CategoryId, cancellationToken);
+        var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
 
         if (category == null)
         {
@@ -95,7 +95,7 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
                 course.Unpublish();
             }
 
-            _unitOfWork.CourseRepository.UpdateCourse(course);
+            _unitOfWork.CourseRepository.Update(course);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Course updated successfully with Id: {CourseId}", course.Id);

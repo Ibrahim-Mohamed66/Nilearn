@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
@@ -14,12 +14,12 @@ namespace Nilearn.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AddRefreshTokenAsync(RefreshToken refreshToken,CancellationToken cancellationToken)
+        public async Task AddAsync(RefreshToken refreshToken,CancellationToken cancellationToken)
         {
             await _context.AddAsync(refreshToken,cancellationToken);
         }
 
-        public async Task<AppUser?> GetAppUserByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+        public async Task<AppUser?> GetUserByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
            var token = await _context.RefreshTokens
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
@@ -30,14 +30,14 @@ namespace Nilearn.Infrastructure.Repositories
             return user;
         }
 
-        public async Task<RefreshToken> GetRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken =default)
+        public async Task<RefreshToken> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken =default)
         {
             var token = await _context.RefreshTokens
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
             return token;
         }
 
-        public async Task<bool> HasValidRefreshTokenAsync(Guid userId ,CancellationToken cancellationToken = default) 
+        public async Task<bool> HasValidAsync(Guid userId ,CancellationToken cancellationToken = default) 
         {
             return await _context.RefreshTokens
                 .Where(r => r.UserId == userId)
@@ -46,14 +46,14 @@ namespace Nilearn.Infrastructure.Repositories
 
         }
 
-        public async Task<bool> IsRefreshTokenValidAsync(string refreshToken,CancellationToken cancellationToken = default)
+        public async Task<bool> IsValidAsync(string refreshToken,CancellationToken cancellationToken = default)
         {
             return await _context.RefreshTokens
               .WhereActive()
               .AnyAsync(rt => rt.Token == refreshToken);
         }
 
-        public async Task RevokeRefreshTokenAsync(string refreshToken , CancellationToken cancellationToken = default)
+        public async Task RevokeAsync(string refreshToken , CancellationToken cancellationToken = default)
         {
             var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
             if(token != null)

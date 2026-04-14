@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Interfaces;
@@ -34,14 +34,14 @@ namespace Nilearn.Application.Features.Course.Queries.GetByInstructorId
         {
             try
             {
-                var instructorId = await _unitOfWork.InstructorRepository.GetInstructorIdByUserIdAsync(request.UserId);
+                var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId);
                 if (instructorId is null)
                 {
                     _logger.LogWarning("Instructor not found for user ID {UserId}", request.UserId);
                     return Result<List<CourseDto>>.FailureResponse(message: "Instructor not found.");
                 }
 
-                var courses = await _unitOfWork.CourseRepository.GetCoursesByInstructorId(instructorId.Value).ToListAsync(cancellationToken);
+                var courses = await _unitOfWork.CourseRepository.GetByInstructorId(instructorId.Value).ToListAsync(cancellationToken);
 
                 var courseDtos = courses.Select(course => new CourseDto
                 {

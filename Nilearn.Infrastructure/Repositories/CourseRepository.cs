@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Nilearn.Application.Common.Extensions;
 using Nilearn.Domain.Entities;
@@ -16,31 +16,33 @@ internal class CourseRepository : ICourseRepository
        _context = context;
     }
 
-    public async Task AddCourseAsync(Course course, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Course course, CancellationToken cancellationToken = default)
     {
         await _context.Courses.AddAsync(course, cancellationToken);
     }
 
-    public async Task DeleteCourseAsync(int courseId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(int courseId, CancellationToken cancellationToken = default)
     {
-        var course = await _context.Courses.FindAsync(courseId, cancellationToken);
+        var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
         if (course != null)
         {
             course.IsDeleted = true;
             course.UpdatedAt = DateTime.UtcNow;
+            return true;
         }
+        return false;
     }
 
-    public IQueryable<Course> GetAllCourses()
+    public IQueryable<Course> GetAll()
     {
         return _context.Courses.AsNoTracking().Where(c => !c.IsDeleted);
     }
 
-    public async Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Course?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Courses.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
     }
-    public IQueryable<Course> GetCoursesByInstructorId(int instructorId)
+    public IQueryable<Course> GetByInstructorId(int instructorId)
     {
         return _context.Courses
             .AsNoTracking()
@@ -50,7 +52,7 @@ internal class CourseRepository : ICourseRepository
                 .ThenInclude(i => i.User);
     }
     
-    public async Task<Course?> GetCourseByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Course?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Courses
             .AsNoTracking()
@@ -60,12 +62,13 @@ internal class CourseRepository : ICourseRepository
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
     }
 
-    public void UpdateCourse(Course course)
+    public void Update(Course course)
     {
+        course.UpdatedAt = DateTime.UtcNow;
         _context.Courses.Update(course);
     }
 
-    public async Task<PagedResponse<Course>> GetPagedCoursesAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResponse<Course>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _context.Courses
             .AsNoTracking()

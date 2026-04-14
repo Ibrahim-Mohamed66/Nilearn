@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Domain.Interfaces;
@@ -19,7 +19,7 @@ public sealed class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result
     public async Task<Result<string>> Handle(LogoutCommand request, CancellationToken cancellationToken)
     {
        
-        await _unitOfWork.RefreshTokenRepository.RevokeRefreshTokenAsync(request.token,cancellationToken);
+        await _unitOfWork.RefreshTokenRepository.RevokeAsync(request.token,cancellationToken);
         _logger.LogInformation("Refresh token {Token} revoked", request.token);
         return Result<string>.SuccessResponse(message: "Logout successful");
     }
