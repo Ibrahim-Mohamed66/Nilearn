@@ -77,7 +77,7 @@ internal sealed class CreateCourseCommandHandler : IRequestHandler<CreateCourseC
 
             var courseResponse = new CreateCourseResponse(course.Id);
             
-            return Result<CreateCourseResponse>.SuccessResponse(courseResponse);
+            return Result<CreateCourseResponse>.SuccessResponse(courseResponse, message:"Course created successfully.");
         }
         catch (Exception ex)
         {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Infrastructure.Configuration;
 using Nilearn.Infrastructure.Configurations;
-using System.Linq.Expressions;
+
 
 
 namespace Nilearn.Infrastructure.Persistence
@@ -21,6 +21,7 @@ namespace Nilearn.Infrastructure.Persistence
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<Section> Sections { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -29,6 +30,7 @@ namespace Nilearn.Infrastructure.Persistence
             builder.ApplyConfiguration(new InstructorConfiguration());
             builder.ApplyConfiguration(new CategoryConfiguration());
             builder.ApplyConfiguration(new CourseConfiguration());
+            builder.ApplyConfiguration(new SectionConfiguration());
         }
     }
 }

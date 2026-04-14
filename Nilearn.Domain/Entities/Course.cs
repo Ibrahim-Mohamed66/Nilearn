@@ -17,6 +17,7 @@ public class Course : BaseEntity
 
     public Category? Category { get; set; }
     public Instructor? Instructor { get; set; }
+    public ICollection<Section> Sections { get; set; } = new List<Section>();
 
     public void Publish()
     {
