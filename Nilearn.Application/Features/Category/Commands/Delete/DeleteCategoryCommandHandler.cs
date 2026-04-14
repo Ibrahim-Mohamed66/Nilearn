@@ -26,7 +26,12 @@ internal sealed class DeleteCategoryCommandHandler : IRequestHandler<DeleteCateg
             return Result<string>.FailureResponse(message:"Category not found." );
         }
 
-        await _unitOfWork.CategoryRepository.DeleteAsync(request.Id, cancellationToken);
+        var deleted = await _unitOfWork.CategoryRepository.DeleteAsync(request.Id, cancellationToken);
+        if (!deleted)
+        {
+            return Result<string>.FailureResponse(message: "Failed to delete category.");
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category with id {Id} deleted with success.", request.Id);
