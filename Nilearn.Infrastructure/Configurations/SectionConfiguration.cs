@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Nilearn.Infrastructure.Configurations
 {
@@ -15,8 +16,7 @@ namespace Nilearn.Infrastructure.Configurations
                    .WithMany(c => c.Sections)
                    .HasForeignKey(s => s.CourseId)
                     .OnDelete(DeleteBehavior.Restrict);
-            builder.HasIndex(s => new { s.CourseId, s.Order })
-           .IsUnique();
+          
         }
     }
 }
