@@ -87,11 +87,7 @@ namespace Nilearn.Infrastructure.Repositories
             {
                 await _transaction.CommitAsync(cancellationToken);
             }
-            catch
-            {
-                await RollbackTransactionAsync(cancellationToken);
-                throw;
-            }
+            
             finally
             {
                 await DisposeTransactionAsync();
