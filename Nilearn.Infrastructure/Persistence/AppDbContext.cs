@@ -22,6 +22,7 @@ namespace Nilearn.Infrastructure.Persistence
         public DbSet<Category> Categories { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Section> Sections { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -31,6 +32,7 @@ namespace Nilearn.Infrastructure.Persistence
             builder.ApplyConfiguration(new CategoryConfiguration());
             builder.ApplyConfiguration(new CourseConfiguration());
             builder.ApplyConfiguration(new SectionConfiguration());
+            builder.ApplyConfiguration(new LessonConfiguration());
         }
     }
 }
