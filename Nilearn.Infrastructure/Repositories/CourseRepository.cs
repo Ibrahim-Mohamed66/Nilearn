@@ -80,4 +80,8 @@ internal class CourseRepository : ICourseRepository
         return await query.ToPagedAsync(pageNumber, pageSize, cancellationToken);
     }
 
-   }
+    public Task<bool> AnyAsync(int courseId, CancellationToken cancellationToken = default)
+    {
+        return _context.Courses.AnyAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+    }
+}

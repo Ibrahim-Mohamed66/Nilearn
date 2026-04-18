@@ -12,6 +12,7 @@ public interface ICourseRepository
     Task<bool> DeleteAsync(int courseId, CancellationToken cancellationToken = default);
     Task<Course?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     IQueryable<Course> GetAll();
+    Task<bool> AnyAsync(int courseId, CancellationToken cancellationToken = default);
     Task<Course?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default);
     Task<PagedResponse<Course>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
     IQueryable<Course> GetByInstructorId(int instructorId);
