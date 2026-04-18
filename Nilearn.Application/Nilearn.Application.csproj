@@ -16,4 +16,10 @@
     <ProjectReference Include="..\Nilearn.Shared\Nilearn.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Section\Commands\Delete\" />
+    <Folder Include="Features\Section\Commands\Update\" />
+    <Folder Include="Features\Section\Queries\GetById\" />
+  </ItemGroup>
+
 </Project>

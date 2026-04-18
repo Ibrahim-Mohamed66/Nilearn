@@ -1,0 +1,140 @@
+using MediatR;
+using Microsoft.Extensions.Logging;
+using Nilearn.Application.Common;
+using Nilearn.Application.Features.Section.DTOs;
+using Nilearn.Domain.Interfaces;
+
+namespace Nilearn.Application.Features.Section.Commands.Update;
+
+internal sealed class UpdateSectionCommandHandler : IRequestHandler<UpdateSectionCommand, Result<SectionResponse>>
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateSectionCommandHandler> _logger;
+
+    public UpdateSectionCommandHandler(IUnitOfWork unitOfWork, ILogger<UpdateSectionCommandHandler> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    public async Task<Result<SectionResponse>> Handle(UpdateSectionCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "Updating section | SectionId: {SectionId} | CourseId: {CourseId}",
+            request.Id, request.CourseId);
+
+        var course = await _unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
+        if (course is null)
+        {
+            _logger.LogWarning("Course not found | CourseId: {CourseId}", request.CourseId);
+            return Result<SectionResponse>.FailureResponse(
+                ["Course not found."],
+                "Failed to update section.");
+        }
+
+        var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
+        if (instructorId is null)
+        {
+            _logger.LogWarning("Instructor not found | UserId: {UserId}", request.UserId);
+            return Result<SectionResponse>.FailureResponse(
+                ["Instructor not found."],
+                "Failed to update section.");
+        }
+
+        if (course.InstructorId != instructorId)
+        {
+            _logger.LogWarning(
+                "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
+                request.CourseId, request.UserId);
+            return Result<SectionResponse>.FailureResponse(
+                ["Unauthorized access."],
+                "Failed to update section.");
+        }
+
+        var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.Id, cancellationToken);
+        if (section is null)
+        {
+            _logger.LogWarning("Section not found | SectionId: {SectionId}", request.Id);
+            return Result<SectionResponse>.FailureResponse(
+                ["Section not found."],
+                "Failed to update section.");
+        }
+
+
+        if (section.CourseId != request.CourseId)
+        {
+            _logger.LogWarning(
+                "Section does not belong to course | SectionId: {SectionId} | CourseId: {CourseId}",
+                request.Id, request.CourseId);
+            return Result<SectionResponse>.FailureResponse(
+                ["Section does not belong to the specified course."],
+                "Failed to update section.");
+        }
+
+
+
+        var maxOrder = await _unitOfWork.SectionRepository.GetMaxOrderAsync(request.CourseId, cancellationToken);
+
+        var finalOrder = Math.Clamp(request.Order, 1, maxOrder);
+
+        if (section.Order == finalOrder &&section.Title == request.Title &&
+                section.Description == request.Description)
+        {
+            return Result<SectionResponse>.SuccessResponse(
+                new SectionResponse(section.Id, section.Title, section.Description, section.Order, section.CourseId),
+                "No changes detected.");
+        }
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            // Handle order reordering if the order changed
+            if (section.Order != finalOrder)
+            {
+
+                if (finalOrder < section.Order)
+                {
+                    // Moving up → shift others down
+                    await _unitOfWork.SectionRepository
+                        .IncrementOrderRangeAsync(request.CourseId, finalOrder, section.Order - 1, cancellationToken);
+                }
+                else if (finalOrder > section.Order)
+                {
+                    // Moving down → shift others up
+                    await _unitOfWork.SectionRepository
+                        .DecrementOrderRangeAsync(request.CourseId, section.Order + 1, finalOrder, cancellationToken);
+                }
+
+                section.Order = finalOrder;
+            }
+
+            section.Title = request.Title;
+            section.Description = request.Description;
+
+            _unitOfWork.SectionRepository.Update(section);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Section updated successfully | SectionId: {SectionId}",
+                section.Id);
+
+            var response = new SectionResponse(
+                section.Id,
+                section.Title,
+                section.Description,
+                section.Order,
+                section.CourseId
+            );
+
+            return Result<SectionResponse>.SuccessResponse(response, "Section updated successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Error occurred while updating section | SectionId: {SectionId} | CourseId: {CourseId}",
+                request.Id, request.CourseId);
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+}
