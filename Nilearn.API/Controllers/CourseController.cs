@@ -11,6 +11,7 @@ using Nilearn.Application.Features.Course.Queries.GetById;
 using Nilearn.Application.Features.Course.Queries.GetByInstructorId;
 using Nilearn.Application.Features.Course.Queries.GetForUpdate;
 using Nilearn.Application.Features.Course.Queries.GetPaged;
+using Nilearn.Application.Features.Section.Queries.GetAll;
 using System.Security.Claims;
 
 namespace Nilearn.API.Controllers;
@@ -174,6 +175,7 @@ public class CourseController : ControllerBase
 
         return Ok(result);
     }
+
     [HttpGet("instructor-courses")]
     [Authorize(Policy = "InstructorOnly")]
     public async Task<IActionResult> GetCoursesByInstructorId(
@@ -193,6 +195,21 @@ public class CourseController : ControllerBase
 
 
     }
+
+
+    [HttpGet("{courseId}/sections")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetSectionsByCourseIdAsync([FromRoute] GetAllSectionsQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        if (!result.Success)
+        {
+            return NotFound(result);
+        }
+        return Ok(result);
+
+    }
+
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "AdminOrInstructor")]
     public async Task<IActionResult> DeleteCourse([FromRoute]int id, CancellationToken cancellationToken)
