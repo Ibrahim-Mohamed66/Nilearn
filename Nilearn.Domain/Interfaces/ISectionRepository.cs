@@ -13,7 +13,10 @@ namespace Nilearn.Domain.Interfaces
         Task<bool> ExistsAsync(int id,CancellationToken cancellationToken =default);
         Task<IEnumerable<Section>> GetByCourseIdAsync(int courseId,CancellationToken cancellationToken = default);
         void UpdateRange(IEnumerable<Section> sections);
-
+        Task IncrementOrderRangeAsync(int courseId, int fromOrder, int toOrder, CancellationToken cancellationToken = default);
+        Task IncrementOrderFromAsync(int courseId, int fromOrder, CancellationToken cancellationToken = default);
+        Task DecrementOrderFromAsync(int courseId, int fromOrder, CancellationToken cancellationToken = default);
+        Task DecrementOrderRangeAsync(int courseId, int fromOrder, int toOrder, CancellationToken cancellationToken = default);
 
     }
 }

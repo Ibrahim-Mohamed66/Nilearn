@@ -32,6 +32,27 @@ internal class SectionRepository : ISectionRepository
 
     }
 
+    public async Task DecrementOrderFromAsync(int courseId, int fromOrder, CancellationToken cancellationToken = default)
+    {
+        await _context.Sections
+            .Where(s => s.CourseId == courseId &&
+                        s.Order >= fromOrder)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s => s.Order, s => s.Order - 1),
+                cancellationToken);
+    }
+
+    public async Task DecrementOrderRangeAsync(int courseId, int fromOrder, int toOrder, CancellationToken cancellationToken = default)
+    {
+        await _context.Sections
+        .Where(s => s.CourseId == courseId &&
+                    s.Order >= fromOrder &&
+                    s.Order <= toOrder)
+        .ExecuteUpdateAsync(setters => setters
+            .SetProperty(s => s.Order, s => s.Order - 1),
+            cancellationToken);
+    }
+
     public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Sections.AnyAsync(s => s.Id == id && !s.IsDeleted, cancellationToken);
@@ -58,6 +79,26 @@ internal class SectionRepository : ISectionRepository
 
             .Where(s => s.CourseId == courseId && !s.IsDeleted)
             .MaxAsync(s => (int?)s.Order, cancellationToken) ?? 0;
+    }
+    public async Task IncrementOrderFromAsync(int courseId,int fromOrder,CancellationToken cancellationToken = default)
+    {
+        await _context.Sections
+            .Where(s =>
+                s.CourseId == courseId &&
+                s.Order >= fromOrder)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s => s.Order, s => s.Order + 1),
+                cancellationToken);
+    }
+    public async Task IncrementOrderRangeAsync(int courseId, int fromOrder,int toOrder ,CancellationToken cancellationToken = default)
+    {
+        await _context.Sections
+       .Where(s => s.CourseId == courseId &&
+                   s.Order >= fromOrder &&
+                   s.Order <= toOrder)
+       .ExecuteUpdateAsync(setters => setters
+           .SetProperty(s => s.Order, s => s.Order + 1),
+           cancellationToken);
     }
 
     public void Update(Section section)
