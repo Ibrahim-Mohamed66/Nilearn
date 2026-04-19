@@ -14,6 +14,7 @@ namespace Nilearn.Infrastructure.Repositories
         private ICategoryRepository? _categoryRepository;
         private ICourseRepository? _courseRepository;
         private ISectionRepository? _sectionRepository;
+        private ILessonRepository? _lessonRepository;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -62,6 +63,13 @@ namespace Nilearn.Infrastructure.Repositories
             get
             {
                 return _courseRepository ??= new CourseRepository(_context);
+            }
+        }
+        public ILessonRepository LessonRepository
+        {
+            get
+            {
+                return _lessonRepository ??= new LessonRepository(_context);
             }
         }
 
