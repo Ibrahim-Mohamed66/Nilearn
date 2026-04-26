@@ -12,14 +12,14 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteCourseCommandHandler> _logger;
     private readonly IMediaService _mediaService;
-    private readonly IImageJobScheduler _imageJobScheduler;
+    private readonly IMediaJobScheduler _mediaJobScheduler;
 
-    public DeleteCourseCommandHandler(IUnitOfWork unitOfWork, ILogger<DeleteCourseCommandHandler> logger, IMediaService mediaService, IImageJobScheduler imageJobScheduler)
+    public DeleteCourseCommandHandler(IUnitOfWork unitOfWork, ILogger<DeleteCourseCommandHandler> logger, IMediaService mediaService, IMediaJobScheduler mediaJobScheduler)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mediaService = mediaService;
-        _imageJobScheduler = imageJobScheduler;
+        _mediaJobScheduler = mediaJobScheduler;
     }
 
     public async Task<Result<string>> Handle(DeleteCourseCommand request, CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
         }
         try
         {
-            await _imageJobScheduler.EnqueueDeleteImageAsync(course.ThumbnailPublicId);
+            await _mediaJobScheduler.EnqueueDeleteImageAsync(course.ThumbnailPublicId);
             _logger.LogInformation("Deleted thumbnail for course with ID {CourseId} from media service.", request.Id);
 
         }

@@ -11,18 +11,19 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMediaService _mediaService;
     private readonly ILogger<UpdateCourseCommandHandler> _logger;
-    private readonly IImageJobScheduler _imageJobScheduler;
+    private readonly IMediaJobScheduler _mediaJobScheduler;
 
     public UpdateCourseCommandHandler(
         IUnitOfWork unitOfWork,
         IMediaService mediaService,
         ILogger<UpdateCourseCommandHandler> logger,
-        IImageJobScheduler imageJobScheduler)
+        IMediaJobScheduler mediaJobScheduler
+             )
     {
         _unitOfWork = unitOfWork;
         _mediaService = mediaService;
         _logger = logger;
-        _imageJobScheduler = imageJobScheduler;
+        _mediaJobScheduler = mediaJobScheduler;
     }
 
     public async Task<Result<string>> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
@@ -53,18 +54,15 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
         }
 
 
-        string? newThumbnailPublicId = null;
+        string newThumbnailPublicId = null;
         string? oldThumbnailPublicId = course.ThumbnailPublicId;
 
         if (request.Thumbnail != null)
         {
             try
             {
-                newThumbnailPublicId = await _mediaService.UploadImageAsync(
-                    request.Thumbnail.Content,
-                    request.Thumbnail.FileName,
-                    request.Purpose
-                );
+                var result = await _mediaService.UploadImageAsync(request.Thumbnail.Content, request.Thumbnail.FileName,request.Purpose,cancellationToken);
+                newThumbnailPublicId = result.PublicId;
             }
             catch (Exception ex)
             {
@@ -104,7 +102,7 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
             {
                 try
                 {
-                    await _imageJobScheduler.EnqueueDeleteImageAsync(oldThumbnailPublicId);
+                    await _mediaJobScheduler.EnqueueDeleteImageAsync(oldThumbnailPublicId);
                 }
                 catch (Exception cleanupEx)
                 {
@@ -122,7 +120,7 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
             {
                 try
                 {
-                    await _imageJobScheduler.EnqueueDeleteImageAsync(newThumbnailPublicId);
+                    await _mediaJobScheduler.EnqueueDeleteImageAsync(newThumbnailPublicId);
                     _logger.LogWarning("Rolled back uploaded thumbnail: {PublicId}", newThumbnailPublicId);
                 }
                 catch (Exception cleanupEx)

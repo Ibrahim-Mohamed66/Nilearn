@@ -4,6 +4,8 @@
     {
         ProfilePicture,
         Thumbnail,
+        Video,
+        Document,
 
     }
 }

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Course.DTOs;
-using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 
 namespace Nilearn.Application.Features.Course.Commands.Create;
@@ -32,11 +31,12 @@ internal sealed class CreateCourseCommandHandler : IRequestHandler<CreateCourseC
 
         try
         {
-            thumbnailPublicId = await _mediaService.UploadImageAsync(
+            var mediaUploadResult = await _mediaService.UploadImageAsync(
                 request.Thumbnail.Content,
                 request.Thumbnail.FileName,
                 request.Purpose
             );
+            thumbnailPublicId = mediaUploadResult.PublicId;
         }
         catch (Exception ex)
         {

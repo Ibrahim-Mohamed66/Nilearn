@@ -11,6 +11,7 @@ using Nilearn.Domain.Enums;
 using Nilearn.Infrastructure.DependencyInjection;
 using Nilearn.Shared.Models;
 using Serilog;
+using System.Text.Json.Serialization;
 namespace Nilearn.API
 {
     public class Program
@@ -33,6 +34,13 @@ namespace Nilearn.API
                 .ReadFrom.Services(services);
 
             });
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(
+                        new JsonStringEnumConverter()
+                    );
+                });
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminOnly", policy =>
@@ -73,7 +81,7 @@ namespace Nilearn.API
             builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddApplicationServices();
             builder.Services.AddScoped<IEmailJobScheduler,HangfireEmailJobScheduler>();
-            builder.Services.AddScoped<IImageJobScheduler, ImageJobScheduler>();
+            builder.Services.AddScoped<IMediaJobScheduler, MediaJobScheduler>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
