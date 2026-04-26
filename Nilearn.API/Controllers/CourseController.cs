@@ -44,7 +44,8 @@ public class CourseController : ControllerBase
         {
             Content = stream,
             FileName = request.Thumbnail.FileName,
-            ContentType = request.Thumbnail.ContentType
+            ContentType = request.Thumbnail.ContentType,
+            Length = request.Thumbnail.Length
         };
 
         var command = new CreateCourseCommand(

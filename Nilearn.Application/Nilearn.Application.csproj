@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Lesson\Commands\Create\CreateArticleLesson\" />
+    <Folder Include="Features\Lesson\Commands\Update\UpdatePdfLesson\" />
+    <Folder Include="Features\Lesson\Commands\Update\UpdateVideoLesson\" />
+    <Folder Include="Features\Lesson\Queries\" />
     <Folder Include="Features\Section\Commands\Delete\" />
     <Folder Include="Features\Section\Commands\Update\" />
     <Folder Include="Features\Section\Queries\GetById\" />

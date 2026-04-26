@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Nilearn.Application\Nilearn.Application.csproj" />
     <ProjectReference Include="..\Nilearn.Infrastructure\Nilearn.Infrastructure.csproj" />
   </ItemGroup>
 

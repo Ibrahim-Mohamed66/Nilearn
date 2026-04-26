@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nilearn.Application.Features.Lesson.Queries.GetAll;
 using Nilearn.Application.Features.Section.Commands.Create;
 using Nilearn.Application.Features.Section.Commands.Delete;
 using Nilearn.Application.Features.Section.Commands.Update;
@@ -83,5 +84,20 @@ namespace Nilearn.API.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet("{sectionId:int}/lessons")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllLessonsBySectionId(int sectionId, CancellationToken cancellationToken = default)
+        {
+
+            var query = new GetAllLessonsQuery(sectionId);
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
     }
 }
