@@ -21,47 +21,26 @@ internal sealed class DeleteSectionCommandHandler : IRequestHandler<DeleteSectio
     {
         _logger.LogInformation("Deleting section | SectionId: {SectionId} | CourseId: {CourseId}", request.Id, request.CourseId);
 
-        var course = await _unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
-        if (course is null)
-        {
-            _logger.LogWarning("Course not found | CourseId: {CourseId}", request.CourseId);
-            return Result<string>.FailureResponse(message: "Course not found.");
-        }
+        var isOwner = await _unitOfWork.CourseRepository.IsOwner(request.CourseId, request.UserId, cancellationToken);
 
-        var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
-        if (instructorId is null)
-        {
-            _logger.LogWarning("Instructor not found | UserId: {UserId}", request.UserId);
-            return Result<string>.FailureResponse(
-                    ["Instructor not found."],
-                    "Failed to delete section.");
-        }
 
-        if (course.InstructorId != instructorId)
+        if (!isOwner)
         {
             _logger.LogWarning(
                 "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
                 request.CourseId, request.UserId);
-            return Result<string>.FailureResponse(
-                    ["Unauthorized access."],
-                    "Failed to delete section.");
-        }
 
+            return Result<string>.FailureResponse(
+                ["Unauthorized access."],
+                "Failed to delete section.");
+        }
         var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.Id, cancellationToken);
         if (section is null)
         {
             _logger.LogWarning("Section not found | SectionId: {SectionId}", request.Id);
-            return Result<string>.FailureResponse(message: "Section not found.");
-        }
-
-        if (section.CourseId != request.CourseId)
-        {
-            _logger.LogWarning(
-                "Section does not belong to course | SectionId: {SectionId} | CourseId: {CourseId}",
-                request.Id, request.CourseId);
             return Result<string>.FailureResponse(
-                    ["Section does not belong to the specified course."],
-                    "Failed to delete section.");
+                ["Section not found."],
+                "Failed to delete section.");
         }
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try

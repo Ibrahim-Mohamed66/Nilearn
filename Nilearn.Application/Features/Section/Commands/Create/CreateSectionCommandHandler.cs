@@ -24,36 +24,17 @@ namespace Nilearn.Application.Features.Section.Commands.Create
                "Creating section | CourseId: {CourseId} | Order: {Order}",
                request.CourseId, request.Order);
 
-            
-            var course = await _unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
-            if (course is null)
-            {
-                _logger.LogWarning(
-                    "Course not found | CourseId: {CourseId}",
-                    request.CourseId);
+            var isOwner = await _unitOfWork.CourseRepository.IsOwner(request.CourseId, request.UserId, cancellationToken);
 
-                return Result<SectionResponse>.FailureResponse(
-                    [ "Course not found." ],
-                    "Failed to create section.");
-            }
-            var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
-            if (instructorId is null)
-            {
-                _logger.LogWarning("Instructor not found | UserId: {UserId}", request.UserId);
 
-                return Result<SectionResponse>.FailureResponse(
-                    ["Instructor not found."],
-                    "Failed to create section.");
-            }
-
-            if (course.InstructorId != instructorId )
+            if (!isOwner)
             {
                 _logger.LogWarning(
                     "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
                     request.CourseId, request.UserId);
 
                 return Result<SectionResponse>.FailureResponse(
-                    [ "Unauthorized access." ],
+                    ["Unauthorized access."],
                     "Failed to create section.");
             }
             

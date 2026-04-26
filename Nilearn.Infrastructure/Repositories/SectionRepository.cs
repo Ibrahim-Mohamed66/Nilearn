@@ -116,4 +116,16 @@ internal class SectionRepository : ISectionRepository
 
         _context.Sections.UpdateRange(sections);
     }
+    public async Task<bool> IsOwner(int sectionId, string userId, CancellationToken cancellationToken = default)
+    {
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            return false;
+
+        return await _context.Sections
+            .AnyAsync(s =>
+                s.Id == sectionId &&
+                !s.IsDeleted &&
+                s.Course.Instructor.AppUserId == parsedUserId,
+                cancellationToken);
+    }
 }

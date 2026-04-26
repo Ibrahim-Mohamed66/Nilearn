@@ -84,4 +84,17 @@ internal class CourseRepository : ICourseRepository
     {
         return _context.Courses.AnyAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
     }
+
+    public async Task<bool> IsOwner(int courseId, string userId, CancellationToken cancellationToken = default)
+    {
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            return false;
+
+        return await _context.Courses
+            .AnyAsync(c =>
+                c.Id == courseId &&
+                !c.IsDeleted &&
+                c.Instructor.AppUserId == parsedUserId,
+                cancellationToken);
+    }
 }

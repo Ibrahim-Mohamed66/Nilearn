@@ -19,33 +19,15 @@ internal sealed class UpdateSectionCommandHandler : IRequestHandler<UpdateSectio
 
     public async Task<Result<SectionResponse>> Handle(UpdateSectionCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Updating section | SectionId: {SectionId} | CourseId: {CourseId}",
-            request.Id, request.CourseId);
+        var isOwner = await _unitOfWork.CourseRepository.IsOwner(request.CourseId, request.UserId, cancellationToken);
 
-        var course = await _unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
-        if (course is null)
-        {
-            _logger.LogWarning("Course not found | CourseId: {CourseId}", request.CourseId);
-            return Result<SectionResponse>.FailureResponse(
-                ["Course not found."],
-                "Failed to update section.");
-        }
 
-        var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
-        if (instructorId is null)
-        {
-            _logger.LogWarning("Instructor not found | UserId: {UserId}", request.UserId);
-            return Result<SectionResponse>.FailureResponse(
-                ["Instructor not found."],
-                "Failed to update section.");
-        }
-
-        if (course.InstructorId != instructorId)
+        if (!isOwner)
         {
             _logger.LogWarning(
                 "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
                 request.CourseId, request.UserId);
+
             return Result<SectionResponse>.FailureResponse(
                 ["Unauthorized access."],
                 "Failed to update section.");
