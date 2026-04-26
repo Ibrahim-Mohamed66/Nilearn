@@ -1,8 +1,12 @@
 ﻿
 namespace Nilearn.Domain.Enums;
 
-public enum ResourceType
+public enum LessonType
 {
     Video,
-    PDF
+    PDF,
+    Article,
+    Quiz,
+    Assignment,
+    Other
 }

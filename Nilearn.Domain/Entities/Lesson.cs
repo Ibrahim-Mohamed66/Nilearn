@@ -12,20 +12,19 @@ public class Lesson : BaseEntity
     public int SectionId { get; set; }
     public Section Section { get; set; } = null!;
 
-    public string? CloudinaryPublicId { get; set; }       
-    public string? SecureResourceUrl { get; set; }     
+    public string? CloudinaryPublicId { get; set; }        
     public string? Format { get; set; }         
     public long? Bytes { get; set; }            // File size in bytes
     public int? DurationInSeconds { get; set; } // Only for videos (from Cloudinary metadata)
-    public ResourceType? ResourceType { get; set; }
+    public LessonType LessonType { get; set; }
     public string? Content { get; set; }
+    public bool IsPreview { get; private set; } = false;
 
 
 
     public void UpdateCloudinaryInfo(string publicId, string secureUrl, string format, long bytes, int? durationInSeconds = null)
     {
         CloudinaryPublicId = publicId;
-        SecureResourceUrl = secureUrl;
         Format = format;
         Bytes = bytes;
         DurationInSeconds = durationInSeconds;
@@ -33,9 +32,16 @@ public class Lesson : BaseEntity
     public void ClearCloudinaryInfo()
     {
         CloudinaryPublicId = null;
-        SecureResourceUrl = null;
         Format = null;
         Bytes = null;
         DurationInSeconds = null;
+    }
+    public void MarkAsPreview()
+    {
+        IsPreview = true;
+    }
+    public void UnmarkAsPreview()
+    {
+        IsPreview = false;
     }
 }

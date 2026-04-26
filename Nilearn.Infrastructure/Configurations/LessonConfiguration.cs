@@ -30,9 +30,7 @@ namespace Nilearn.Infrastructure.Configurations
             builder.Property(l => l.CloudinaryPublicId)
                 .HasMaxLength(500);
 
-            builder.Property(l => l.SecureResourceUrl)
-                .HasMaxLength(1000);
-
+            
             builder.Property(l => l.Format)
                 .HasMaxLength(50);
 
