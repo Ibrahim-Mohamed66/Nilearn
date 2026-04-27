@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
@@ -38,6 +38,13 @@ namespace Nilearn.Infrastructure.Persistence
             builder.ApplyConfiguration(new EnrollmentConfiguration());
             builder.ApplyConfiguration(new PaymentConfiguration());
 
+            // Global query filter for soft delete
+            builder.Entity<Category>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Course>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Section>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Lesson>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Enrollment>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Payment>().HasQueryFilter(e => !e.IsDeleted);
 
         }
     }

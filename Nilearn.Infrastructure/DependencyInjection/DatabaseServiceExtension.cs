@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Initializer;
 using Nilearn.Infrastructure.Persistence;
@@ -22,12 +23,16 @@ namespace Nilearn.Infrastructure.DependencyInjection
             var pgPassword = Environment.GetEnvironmentVariable("PG_PASSWORD") ?? "";
             connectionString = connectionString.Replace("${PG_PASSWORD}", pgPassword);
 
-            // Register DbContext with PostgreSQL
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(connectionString))
-                .AddScoped<IUnitOfWork, UnitOfWork>();
-            
+            services.AddScoped<TimestampInterceptor>();
 
+            // Register DbContext with PostgreSQL
+            services.AddDbContext<AppDbContext>((sp, options) =>
+            {
+                options.UseNpgsql(connectionString);
+                options.AddInterceptors(sp.GetRequiredService<TimestampInterceptor>());
+            });
+            
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
     }
