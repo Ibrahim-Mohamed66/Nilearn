@@ -9,6 +9,8 @@
         public ICourseRepository CourseRepository { get; }
         public ISectionRepository SectionRepository { get; }
         public ILessonRepository LessonRepository { get; }
+        public IEnrollmentRepository EnrollmentRepository { get; }
+        public IPaymentRepository PaymentRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(CancellationToken cancellationToken = default);
