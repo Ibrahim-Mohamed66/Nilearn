@@ -50,7 +50,6 @@ internal sealed class CreateArticleLessonCommandHandler : IRequestHandler<Create
                 Order = finalOrder,
                 Content = request.Content,
                 LessonType = LessonType.Article,
-                CreatedAt = DateTime.UtcNow,
             };
 
             if (request.IsPreview)

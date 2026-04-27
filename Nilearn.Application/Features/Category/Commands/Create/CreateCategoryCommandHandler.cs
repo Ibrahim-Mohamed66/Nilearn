@@ -33,7 +33,6 @@ internal sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCateg
             Description = request.Description,
             IconClass = request.IconClass,
             IsActive = request.IsActive,
-            CreatedAt = DateTime.UtcNow,
 
         };
 

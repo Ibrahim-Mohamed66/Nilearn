@@ -30,7 +30,6 @@ internal sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCateg
         category.Description = request.Description;
         category.IconClass = request.IconClass;
         category.IsActive = request.IsActive;
-        category.UpdatedAt = DateTime.UtcNow;
 
         _unitOfWork.CategoryRepository.Update(category);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

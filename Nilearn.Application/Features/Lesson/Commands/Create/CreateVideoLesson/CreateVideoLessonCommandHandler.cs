@@ -72,7 +72,6 @@ namespace Nilearn.Application.Features.Lesson.Commands.Create.CreateVideoLesson
                     Bytes = videoUploadResult.Bytes,
                     LessonType = LessonType.Video,
                     CloudinaryPublicId = videoUploadResult.PublicId,
-                    CreatedAt = DateTime.UtcNow,
                 };
 
                 if(request.IsPreview)

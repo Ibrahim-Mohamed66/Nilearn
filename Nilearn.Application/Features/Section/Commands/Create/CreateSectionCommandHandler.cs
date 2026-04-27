@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Features.Section.DTOs;
@@ -55,7 +55,6 @@ namespace Nilearn.Application.Features.Section.Commands.Create
                     Description = request.Description,
                     Order = finalOrder,
                     CourseId = request.CourseId,
-                    CreatedAt = DateTime.UtcNow,
                 };
                 await _unitOfWork.SectionRepository.AddAsync(section, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

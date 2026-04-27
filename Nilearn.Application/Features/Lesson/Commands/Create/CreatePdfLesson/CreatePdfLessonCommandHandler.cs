@@ -61,7 +61,6 @@ internal sealed class CreatePdfLessonCommandHandler : IRequestHandler<CreatePdfL
                 Bytes = pdfUploadResult.Bytes,
                 LessonType = LessonType.PDF,
                 CloudinaryPublicId = pdfUploadResult.PublicId,
-                CreatedAt = DateTime.UtcNow,
             };
 
             if (request.IsPreview)
