@@ -16,7 +16,7 @@ namespace Nilearn.Infrastructure.Repositories
 
         public async Task AddAsync(RefreshToken refreshToken,CancellationToken cancellationToken)
         {
-            await _context.AddAsync(refreshToken,cancellationToken);
+            await _context.RefreshTokens.AddAsync(refreshToken,cancellationToken);
         }
 
         public async Task<AppUser?> GetUserByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
