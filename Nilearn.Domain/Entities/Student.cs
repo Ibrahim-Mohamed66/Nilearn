@@ -7,6 +7,8 @@
         public string StudentNumber { get; set; } = string.Empty;
         public int CurrentLevel { get; set; } // Year 1, 2, 3, 4
         public AppUser? AppUser { get; set; }
-       
+
+        public ICollection<Enrollment> Enrollments { get;  private set; } = new List<Enrollment>();
+
     }
 }
