@@ -21,11 +21,10 @@ internal class SectionRepository : ISectionRepository
 
     public async Task<bool> DeleteAsync(int sectionId, CancellationToken cancellationToken = default)
     {
-        var section = await _context.Sections.FirstOrDefaultAsync(s => s.Id == sectionId && !s.IsDeleted, cancellationToken);
+        var section = await _context.Sections.FirstOrDefaultAsync(s => s.Id == sectionId, cancellationToken);
         if (section != null)
         {
             section.IsDeleted = true;
-            section.UpdatedAt = DateTime.UtcNow;
             return true;
         }
         return false;
@@ -55,14 +54,14 @@ internal class SectionRepository : ISectionRepository
 
     public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Sections.AnyAsync(s => s.Id == id && !s.IsDeleted, cancellationToken);
+        return await _context.Sections.AnyAsync(s => s.Id == id, cancellationToken);
     }
 
     public async Task<IEnumerable<Section>> GetByCourseIdAsync(int courseId, CancellationToken cancellationToken = default)
     {
 
         var sections = await _context.Sections.AsNoTracking()
-            .Where(s => s.CourseId == courseId && !s.IsDeleted)
+            .Where(s => s.CourseId == courseId)
             .OrderBy(s => s.Order)
             .ToListAsync(cancellationToken);
         return sections;
@@ -70,14 +69,14 @@ internal class SectionRepository : ISectionRepository
 
     public async Task<Section?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Sections.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted, cancellationToken);
+        return await _context.Sections.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
     public async Task<int> GetMaxOrderAsync(int courseId, CancellationToken cancellationToken = default)
     {
         return await _context.Sections
 
-            .Where(s => s.CourseId == courseId && !s.IsDeleted)
+            .Where(s => s.CourseId == courseId)
             .MaxAsync(s => (int?)s.Order, cancellationToken) ?? 0;
     }
     public async Task IncrementOrderFromAsync(int courseId,int fromOrder,CancellationToken cancellationToken = default)
@@ -103,17 +102,11 @@ internal class SectionRepository : ISectionRepository
 
     public void Update(Section section)
     {
-        section.UpdatedAt = DateTime.UtcNow;
         _context.Sections.Update(section);
     }
 
     public void UpdateRange(IEnumerable<Section> sections)
     {
-        foreach (var section in sections)
-        {
-            section.UpdatedAt = DateTime.UtcNow;
-        }
-
         _context.Sections.UpdateRange(sections);
     }
     public async Task<bool> IsOwner(int sectionId, string userId, CancellationToken cancellationToken = default)
@@ -124,7 +117,6 @@ internal class SectionRepository : ISectionRepository
         return await _context.Sections
             .AnyAsync(s =>
                 s.Id == sectionId &&
-                !s.IsDeleted &&
                 s.Course.Instructor.AppUserId == parsedUserId,
                 cancellationToken);
     }

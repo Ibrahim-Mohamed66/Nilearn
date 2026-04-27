@@ -15,12 +15,12 @@ namespace Nilearn.Infrastructure.Repositories
         }
         public async Task AddAsync(Instructor instructor, CancellationToken cancellationToken = default)
         {
-            await _context.AddAsync(instructor, cancellationToken);
+            await _context.Instructors.AddAsync(instructor, cancellationToken);
         }
 
         public void Update(Instructor instructor)
         {
-            _context.Update(instructor);
+            _context.Instructors.Update(instructor);
         }
 
         public async Task<int?> GetIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)

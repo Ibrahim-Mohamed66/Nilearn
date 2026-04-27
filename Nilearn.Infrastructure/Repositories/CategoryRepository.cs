@@ -22,12 +22,11 @@ internal class CategoryRepository : ICategoryRepository
     public async Task<bool> DeleteAsync(int categoryId, CancellationToken cancellationToken = default)
     {
         var category = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Id == categoryId && !c.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == categoryId, cancellationToken);
 
         if (category != null)
         {
             category.IsDeleted = true;
-            category.UpdatedAt = DateTime.UtcNow;
             return true;
         }
         return false;
@@ -36,7 +35,6 @@ internal class CategoryRepository : ICategoryRepository
     public IQueryable<Category> GetAll()
     {
         return _context.Categories
-            .Where(c => !c.IsDeleted)
             .AsNoTracking();
     }
     
@@ -46,19 +44,18 @@ internal class CategoryRepository : ICategoryRepository
     {
         return await _context.Categories
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public Task<Category?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
        return _context.Categories
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Name == name && !c.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
     }
 
     public void Update(Category category)
     {
-        category.UpdatedAt = DateTime.UtcNow;
         _context.Categories.Update(category);
     }
 }

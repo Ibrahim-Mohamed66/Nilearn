@@ -23,11 +23,10 @@ internal class CourseRepository : ICourseRepository
 
     public async Task<bool> DeleteAsync(int courseId, CancellationToken cancellationToken = default)
     {
-        var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+        var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId, cancellationToken);
         if (course != null)
         {
             course.IsDeleted = true;
-            course.UpdatedAt = DateTime.UtcNow;
             return true;
         }
         return false;
@@ -35,18 +34,18 @@ internal class CourseRepository : ICourseRepository
 
     public IQueryable<Course> GetAll()
     {
-        return _context.Courses.AsNoTracking().Where(c => !c.IsDeleted);
+        return _context.Courses.AsNoTracking();
     }
 
     public async Task<Course?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Courses.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
+        return await _context.Courses.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
     public IQueryable<Course> GetByInstructorId(int instructorId)
     {
         return _context.Courses
             .AsNoTracking()
-            .Where(c => c.InstructorId == instructorId && !c.IsDeleted)
+            .Where(c => c.InstructorId == instructorId)
             .Include(c => c.Category)
             .Include(c => c.Instructor)
                 .ThenInclude(i => i.User);
@@ -59,12 +58,11 @@ internal class CourseRepository : ICourseRepository
             .Include(c => c.Category)
             .Include(c => c.Instructor)
                 .ThenInclude(i => i.User)
-            .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public void Update(Course course)
     {
-        course.UpdatedAt = DateTime.UtcNow;
         _context.Courses.Update(course);
     }
 
@@ -72,7 +70,6 @@ internal class CourseRepository : ICourseRepository
     {
         var query = _context.Courses
             .AsNoTracking()
-            .Where(c => !c.IsDeleted)
             .Include(c => c.Category)
             .Include(c => c.Instructor)
                 .ThenInclude(i => i.User);
@@ -82,7 +79,7 @@ internal class CourseRepository : ICourseRepository
 
     public Task<bool> AnyAsync(int courseId, CancellationToken cancellationToken = default)
     {
-        return _context.Courses.AnyAsync(c => c.Id == courseId && !c.IsDeleted, cancellationToken);
+        return _context.Courses.AnyAsync(c => c.Id == courseId, cancellationToken);
     }
 
     public async Task<bool> IsOwner(int courseId, string userId, CancellationToken cancellationToken = default)
@@ -93,7 +90,6 @@ internal class CourseRepository : ICourseRepository
         return await _context.Courses
             .AnyAsync(c =>
                 c.Id == courseId &&
-                !c.IsDeleted &&
                 c.Instructor.AppUserId == parsedUserId,
                 cancellationToken);
     }
