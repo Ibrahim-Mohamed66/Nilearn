@@ -1,4 +1,4 @@
-﻿namespace Nilearn.Domain.Interfaces
+namespace Nilearn.Domain.Interfaces
 {
     public interface IUnitOfWork : IAsyncDisposable
     {

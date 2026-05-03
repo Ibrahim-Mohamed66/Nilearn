@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Infrastructure.Configuration;
 using Nilearn.Infrastructure.Configurations;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+
 
 
 
@@ -45,6 +47,12 @@ namespace Nilearn.Infrastructure.Persistence
             builder.Entity<Lesson>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Enrollment>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Payment>().HasQueryFilter(e => !e.IsDeleted);
+
+            //builder.UseXminAsConcurrencyToken<Payment>();
+
+
+
+
 
         }
     }

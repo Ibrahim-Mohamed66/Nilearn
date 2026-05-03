@@ -24,12 +24,15 @@ namespace Nilearn.Infrastructure.DependencyInjection
             connectionString = connectionString.Replace("${PG_PASSWORD}", pgPassword);
 
             services.AddScoped<TimestampInterceptor>();
+            services.AddScoped<DomainEventInterceptor>();
 
             // Register DbContext with PostgreSQL
             services.AddDbContext<AppDbContext>((sp, options) =>
             {
                 options.UseNpgsql(connectionString);
-                options.AddInterceptors(sp.GetRequiredService<TimestampInterceptor>());
+                options.AddInterceptors(
+                    sp.GetRequiredService<TimestampInterceptor>(),
+                    sp.GetRequiredService<DomainEventInterceptor>());
             });
             
             services.AddScoped<IUnitOfWork, UnitOfWork>();
