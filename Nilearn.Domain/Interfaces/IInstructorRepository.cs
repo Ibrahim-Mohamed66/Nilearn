@@ -8,6 +8,4 @@ public interface IInstructorRepository
     void Update(Instructor instructor);
 
     Task<int?> GetIdByUserIdAsync(string userId, CancellationToken cancellationToken = default);
-
-
 }

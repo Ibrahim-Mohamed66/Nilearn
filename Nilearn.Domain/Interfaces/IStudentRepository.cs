@@ -7,8 +7,9 @@ namespace Nilearn.Domain.Interfaces
 {
     public interface IStudentRepository
     {
-         Task AddAsync(Student student, CancellationToken cancellationToken = default);
-         void Update(Student student, CancellationToken cancellationToken = default);
+        Task AddAsync(Student student, CancellationToken cancellationToken = default);
+        void Update(Student student, CancellationToken cancellationToken = default);
+        Task<Student?> GetByUserId(string userId,CancellationToken cancellationToken = default);
 
     }
 }
