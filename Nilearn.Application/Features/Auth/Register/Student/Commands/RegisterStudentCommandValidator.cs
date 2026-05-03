@@ -25,12 +25,10 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
             RuleFor(x => x.LastName)
                 .NotEmpty().WithMessage("Last name is required.");
 
-            RuleFor(x => x.StudentNumber)
-                .NotEmpty().WithMessage("Student number is required.")
-                .Matches(@"^\d{9}$").WithMessage("Student number must be exactly 9 digits."); 
-
-            RuleFor(x => x.CurrentLevel)
-                .InclusiveBetween(1, 5).WithMessage("Current level must be between 1 and 5."); 
+            RuleFor(x => x.PhoneNumber)
+                .NotEmpty().WithMessage("Phone number is required.")
+               .Matches(@"^\+?[1-9]\d{1,14}$")
+               .WithMessage("Invalid phone number format.");
         }
     }
 }

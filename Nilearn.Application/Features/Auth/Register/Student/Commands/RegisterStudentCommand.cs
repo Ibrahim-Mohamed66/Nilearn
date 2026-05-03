@@ -9,7 +9,5 @@ public sealed record RegisterStudentCommand(
     string Email,
     string Password,
     string ConfirmPassword,
-    string? PhoneNumber,
-    DateOnly DateOfBirth,
-    string StudentNumber,
-    int CurrentLevel) : IRequest<Result<string>>;
+    string PhoneNumber,
+    DateOnly DateOfBirth): IRequest<Result<string>>;

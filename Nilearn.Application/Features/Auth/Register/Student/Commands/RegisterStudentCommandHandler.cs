@@ -3,12 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Interfaces;
-using Nilearn.Application.Features.Auth.EmailVerification.SendEmailVerification.Commands;
-using Nilearn.Application.Services;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
-using Nilearn.Shared.Models;
 
 namespace Nilearn.Application.Features.Auth.Register.Student.Commands
 {
@@ -61,8 +58,6 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
             var studentProfile = new Nilearn.Domain.Entities.Student
             {
                 AppUserId = user.Id,
-                CurrentLevel = request.CurrentLevel,
-                StudentNumber = request.StudentNumber
             };
 
             try
