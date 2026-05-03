@@ -29,10 +29,10 @@ public class Enrollment : BaseEntity
         if(IsCancelled)
             throw new InvalidOperationException("Cannot activate a cancelled enrollment.");
 
-
-
         Status = EnrollmentStatus.Active;
         ActivatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new Events.EnrollmentActivatedEvent(Id, StudentId, CourseId));
     }
 
     public void Cancel()
@@ -44,11 +44,16 @@ public class Enrollment : BaseEntity
 
         Status = EnrollmentStatus.Cancelled;
     }
+    public void Reactivate()
+    {
+        if (Status != EnrollmentStatus.Cancelled)
+            throw new InvalidOperationException("Only cancelled enrollments can be reactivated.");
 
+        Status = EnrollmentStatus.Pending;
+        ActivatedAt = null;
+    }
     public bool IsActive => Status == EnrollmentStatus.Active;
     public bool IsPending => Status == EnrollmentStatus.Pending;
     public bool IsCancelled => Status == EnrollmentStatus.Cancelled;
-
-
 
 }
