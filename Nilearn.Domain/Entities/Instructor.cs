@@ -7,6 +7,5 @@ public class Instructor
     public string? Headline { get; set; }
     public string? WebsiteUrl { get; set; }
     public bool IsApproved { get; set; } = false;
-    public decimal EarningBalance { get; set; } = 0;
     public AppUser? User { get; set; }
 }
