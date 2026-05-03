@@ -16,7 +16,9 @@ public static class DependencyInjection
             .AddIdentityServices(configuration)
             .AddEmailService(configuration)
             .AddJwtServices(configuration)
-            .AddMediaServices(configuration);
+            .AddMediaServices(configuration)
+            .AddPaymobService(configuration);
+
 
         services.AddScoped<IDbInitializer, DbInitializer>();
           
