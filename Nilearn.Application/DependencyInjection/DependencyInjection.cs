@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Nilearn.Application.Common.Interfaces;
+using Nilearn.Application.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +16,8 @@ namespace Nilearn.Application.DependencyInjection
                 .AddMediatRService()
                 .AddFluentValidation()
                 .AddEmailApplicationServices();
+
+            services.AddScoped<IEnrollmentService, EnrollmentService>();
 
             return services;
         }
