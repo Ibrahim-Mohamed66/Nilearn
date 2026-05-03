@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Nilearn.Domain.Entities;
 
 namespace Nilearn.Infrastructure.Configurations
@@ -52,13 +53,15 @@ namespace Nilearn.Infrastructure.Configurations
             builder.HasIndex(p => p.MerchantReferenceId)
                    .IsUnique();
 
-          
-            
-            builder.Property(p => p.Version)
-                   .IsRowVersion()
-                   .IsConcurrencyToken();
 
-          
+
+
+
+            builder.Property(p => p.Version)
+                   .IsRowVersion();
+
+
+
             builder.HasIndex(p => p.PaymobTransactionId)
                    .IsUnique()
                    .HasFilter("\"PaymobTransactionId\" IS NOT NULL");

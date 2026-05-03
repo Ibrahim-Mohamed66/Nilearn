@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Enums;
@@ -29,6 +29,7 @@ namespace Nilearn.Infrastructure.Configurations
 
             builder.HasIndex(e => new { e.StudentId, e.CourseId })
                    .IsUnique();
+                  
 
             builder.HasIndex(e => e.StudentId);
             builder.HasIndex(e => e.CourseId);

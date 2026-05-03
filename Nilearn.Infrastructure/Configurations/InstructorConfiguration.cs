@@ -20,8 +20,6 @@ namespace Nilearn.Infrastructure.Configuration
             builder.Property(i => i.WebsiteUrl)
                 .HasMaxLength(200);
 
-            builder.Property(i => i.EarningBalance)
-                .HasPrecision(18, 2);
 
            
         }
