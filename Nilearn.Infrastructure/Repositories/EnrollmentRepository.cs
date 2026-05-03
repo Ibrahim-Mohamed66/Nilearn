@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
+using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
 
@@ -24,7 +25,17 @@ namespace Nilearn.Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
         }
-        
+        public async Task<Enrollment?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Enrollments
+                .AsNoTracking()
+                .Include(e => e.Student)
+                    .ThenInclude(s => s.AppUser)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Instructor)
+                        .ThenInclude(i => i.User)
+                .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        }
 
         public async Task<Enrollment?> GetByStudentAndCourseAsync(int studentId, int courseId, CancellationToken cancellationToken = default)
         {
@@ -41,15 +52,56 @@ namespace Nilearn.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public IQueryable<Enrollment> QueryByCourseId(int courseId, EnrollmentStatus? status = null)
+        {
+            var query = _context.Enrollments
+                .AsNoTracking()
+                .Where(e => e.CourseId == courseId && !e.IsDeleted);
+
+            if (status.HasValue)
+            {
+                query = query.Where(e => e.Status == status.Value);
+            }
+
+            return query.Include(e => e.Student);
+        }
+
+        public IQueryable<Enrollment> QueryByStudentId(int studentId, EnrollmentStatus? status = null)
+        {
+            var query = _context.Enrollments
+                .AsNoTracking()
+                .Where(e => e.StudentId == studentId);
+
+            if (status.HasValue)
+            {
+                query = query.Where(e => e.Status == status.Value);
+            }
+
+            return query.Include(e => e.Course);
+              
+
+        }
+
+
+
         public async Task<bool> IsEnrolledAsync(int studentId, int courseId, CancellationToken cancellationToken = default)
         {
             return await _context.Enrollments
-                .AnyAsync(e => e.StudentId == studentId && e.CourseId == courseId, cancellationToken);
+                .AnyAsync(e => e.StudentId == studentId && e.CourseId == courseId && e.Status == EnrollmentStatus.Active, cancellationToken);
         }
 
         public void Update(Enrollment enrollment)
         {
             _context.Enrollments.Update(enrollment);
+        }
+
+        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var enrollment = await _context.Enrollments.FindAsync(id, cancellationToken);
+            if (enrollment is null)
+                return false;
+            enrollment.IsDeleted = true;
+            return true;
         }
     }
 }

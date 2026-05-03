@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
+using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
 
@@ -11,6 +12,20 @@ internal class PaymentRepository : IPaymentRepository
     public PaymentRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public IQueryable<Payment> QueryPaymentHistory(int studentId,PaymentStatus? status = null)
+    {
+        var query = _context.Payments
+            .AsNoTracking()
+            .OrderByDescending(p => p.CreatedAt)
+            .Include(p => p.Enrollment)
+            .Where(p => p.Enrollment.StudentId == studentId);
+        if (status.HasValue)
+        {
+            query = query.Where(p => p.Status == status.Value);
+        }
+        return query;
     }
 
     public async Task AddAsync(Payment payment, CancellationToken cancellationToken = default)
@@ -48,5 +63,16 @@ internal class PaymentRepository : IPaymentRepository
     public void Update(Payment payment)
     {
         _context.Payments.Update(payment);
+    }
+
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var payment = await _context.Payments.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        if (payment != null)
+        {
+            payment.IsDeleted = true;
+            return true;
+        }
+        return false;
     }
 }
