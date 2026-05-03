@@ -7,5 +7,6 @@ namespace Nilearn.Application.Common.Interfaces
     {
         Task SendVerificationEmailAsync(AppUser user,CancellationToken cancellationToken);
         Task<EmailConfirmationResult>  ConfirmEmailAsync(string userId, string token,CancellationToken cancellationToken);
+        Task SendEnrollmentActivatedEmailAsync(string studentEmail, string studentFirstName, string courseTitle, string instructorName, int courseId, CancellationToken cancellationToken);
     }
 }

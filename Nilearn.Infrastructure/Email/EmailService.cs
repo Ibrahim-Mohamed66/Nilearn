@@ -29,7 +29,7 @@ namespace Nilearn.Infrastructure.Email
 
             using var message = new MailMessage
             {
-                From = new MailAddress(_settings.From),
+                From = new MailAddress(_settings.From,"Nilearn"),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true

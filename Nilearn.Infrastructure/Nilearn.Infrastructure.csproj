@@ -45,4 +45,10 @@
     <ProjectReference Include="..\Nilearn.Shared\Nilearn.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Email\Templates\EnrollmentActivated.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

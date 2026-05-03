@@ -3,9 +3,7 @@ using Nilearn.Application.Common.Enums;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Entities;
 using Nilearn.Shared.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace Nilearn.Application.Services
 {
@@ -56,7 +54,50 @@ namespace Nilearn.Application.Services
 
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
-            return result.Succeeded ? EmailConfirmationResult.Success : EmailConfirmationResult.InvalidToken;
+            if (result.Succeeded)
+            {
+                await SendWelcomeEmailAsync(user, cancellationToken);
+                return EmailConfirmationResult.Success;
+            }
+            return EmailConfirmationResult.InvalidToken;
+        }
+
+        private async Task SendWelcomeEmailAsync(AppUser user, CancellationToken cancellationToken)
+        {
+            var loginLink = $"{_config.FrontendUrl}/login";
+
+            var templateValues = new Dictionary<string, string>
+            {
+                { "displayName", user.FirstName },
+                { "loginLink", loginLink },
+                { "currentYear", DateTime.UtcNow.Year.ToString() }
+            };
+
+            var emailBody = _templateRenderer.Render("Email/Templates/Welcome.html", templateValues);
+
+            await _emailJobScheduler.EnqueueEmailAsync(user.Email, "Welcome to Nilearn!", emailBody, cancellationToken);
+        }
+
+        public async Task SendEnrollmentActivatedEmailAsync(string studentEmail, string studentFirstName, string courseTitle, string instructorName, int courseId, CancellationToken cancellationToken)
+        {
+            var courseLink = $"{_config.FrontendUrl}/course/{courseId}";
+
+            var templateValues = new Dictionary<string, string>
+            {
+                { "displayName", studentFirstName },
+                { "courseTitle", courseTitle },
+                { "instructorName", instructorName },
+                { "courseLink", courseLink },
+                { "currentYear", DateTime.UtcNow.Year.ToString() }
+            };
+
+            var emailBody = _templateRenderer.Render("Email/Templates/EnrollmentActivated.html", templateValues);
+
+            await _emailJobScheduler.EnqueueEmailAsync(
+                studentEmail,
+                $"You're Enrolled: {courseTitle}",
+                emailBody,
+                cancellationToken);
         }
     }
 }
