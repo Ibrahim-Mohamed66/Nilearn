@@ -1,4 +1,5 @@
-﻿using Nilearn.Domain.Enums;
+using Nilearn.Domain.Enums;
+using Nilearn.Domain.Events;
 using Nilearn.Domain.Exceptions;
 namespace Nilearn.Domain.Entities;
 
@@ -15,25 +16,23 @@ public class Payment : BaseEntity
     public string? PaymobOrderId { get; private set; }
     public DateTime? PaidAt { get; private set; }
     public string MerchantReferenceId {  get; private set; }
-
-    public byte[] Version { get; private set; }
     public Enrollment? Enrollment { get; private set; }
+    public uint Version { get; set; }
 
     public Payment(int enrollmentId, decimal amount, Currency currency = Currency.EGP)
     {
         EnrollmentId = enrollmentId;
         Amount = amount;
         Currency = currency;
-        MerchantReferenceId = $"enroll_{enrollmentId}_{Guid.NewGuid():N}";
+        MerchantReferenceId = $"enroll_{enrollmentId}_{Guid.NewGuid():N}";  
     }
 
     protected Payment() { } // For EF Core
 
-    public void MarkAsSucceeded(string transactionId, string orderId, string intentionId)
+    public void MarkAsSucceeded(string transactionId, string orderId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(transactionId);
         ArgumentException.ThrowIfNullOrWhiteSpace(orderId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(intentionId);
 
         if (IsSuccessful && PaymobTransactionId == transactionId)
             return;
@@ -45,12 +44,20 @@ public class Payment : BaseEntity
         Status = PaymentStatus.Success;
         PaymobTransactionId = transactionId;
         PaymobOrderId = orderId;
-        PaymobIntentionId = intentionId;
         PaidAt = DateTime.UtcNow;
-       
+
+        AddDomainEvent(new PaymentSucceededEvent(Id));
+
+
     }
 
-    public void MarkAsFailed(string? transactionId = null, string? orderId = null, string? intentionId = null)
+    public void SetPaymobData(string intentionId, string orderId)
+    {
+        PaymobIntentionId = intentionId;
+        PaymobOrderId = orderId;
+    }
+
+    public void MarkAsFailed(string? transactionId = null, string? orderId = null)
     {
         if (IsFailed && transactionId == PaymobTransactionId)
             return;
@@ -62,8 +69,6 @@ public class Payment : BaseEntity
         Status = PaymentStatus.Failed;
         PaymobTransactionId = transactionId ?? PaymobTransactionId;
         PaymobOrderId = orderId ?? PaymobOrderId;
-        PaymobIntentionId = intentionId ?? PaymobIntentionId;
-
     }
     public bool IsSuccessful => Status == PaymentStatus.Success;
     public bool IsPending => Status == PaymentStatus.Pending;
