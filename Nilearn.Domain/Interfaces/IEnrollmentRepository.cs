@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using Nilearn.Domain.Entities;
+﻿using Nilearn.Domain.Entities;
 using Nilearn.Domain.Enums;
 
 namespace Nilearn.Domain.Interfaces;

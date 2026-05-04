@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Persistence;
@@ -35,5 +35,27 @@ internal class WalletTransactionRepository : IWalletTransactionRepository
     public Task<List<WalletTransaction>> GetByPaymentIdAsync(int paymentId, CancellationToken cancellationToken)
     {
         return _context.WalletTransactions.Where(t => t.PaymentId == paymentId).ToListAsync(cancellationToken);
+    }
+
+    public IQueryable<WalletTransaction> QueryByInstructorId(int instructorId, DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var query = _context.WalletTransactions
+            .AsNoTracking()
+            .Where(t => t.InstructorId == instructorId);
+
+        if (startDate.HasValue)
+            query = query.Where(t => t.CreatedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(t => t.CreatedAt <= endDate.Value);
+
+        return query.OrderByDescending(t => t.CreatedAt);
+    }
+
+    public IQueryable<WalletTransaction> QueryAll()
+    {
+        return _context.WalletTransactions
+            .AsNoTracking()
+            .OrderByDescending(t => t.CreatedAt);
     }
 }
