@@ -19,6 +19,9 @@ namespace Nilearn.Infrastructure.Repositories
         private ILessonRepository? _lessonRepository;
         private IEnrollmentRepository? _enrollmentRepository;
         private IPaymentRepository? _paymentRepository;
+        private IWalletTransactionRepository? _walletTransactionRepository;
+        private IPlatformWalletRepository? _platformWalletRepository;
+        private IInstructorWalletRepository? _instructorWalletRepository;
 
         public UnitOfWork(AppDbContext context)
         {
@@ -90,6 +93,27 @@ namespace Nilearn.Infrastructure.Repositories
             get
             {
                 return _paymentRepository ??= new PaymentRepository(_context);
+            }
+        }
+        public IWalletTransactionRepository WalletTransactionRepository
+        {
+            get
+            {
+                return _walletTransactionRepository ??= new WalletTransactionRepository(_context);
+            }
+        }
+        public IPlatformWalletRepository PlatformWalletRepository
+        {
+            get
+            {
+                return _platformWalletRepository ??= new PlatformWalletRepository(_context);
+            }
+        }
+        public IInstructorWalletRepository InstructorWalletRepository
+        {
+            get
+            {
+                return _instructorWalletRepository ??= new InstructorWalletRepository(_context);
             }
         }
 

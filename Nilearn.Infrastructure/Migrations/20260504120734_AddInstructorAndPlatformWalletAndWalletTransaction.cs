@@ -32,7 +32,7 @@ namespace Nilearn.Infrastructure.Migrations
                         column: x => x.InstructorId,
                         principalTable: "Instructors",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -76,7 +76,7 @@ namespace Nilearn.Infrastructure.Migrations
                         column: x => x.PaymentId,
                         principalTable: "Payments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
