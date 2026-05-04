@@ -7,6 +7,7 @@
         public AppUser? AppUser { get; set; }
 
         public ICollection<Enrollment> Enrollments { get;  private set; } = new List<Enrollment>();
+        public ICollection<Review> Reviews { get; private set; } = new List<Review>();
 
     }
 }

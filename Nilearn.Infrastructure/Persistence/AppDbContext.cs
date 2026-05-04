@@ -27,6 +27,7 @@ namespace Nilearn.Infrastructure.Persistence
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Review> Reviews { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<InstructorWallet> InstructorWallets { get; set; }
         public DbSet<PlatformWallet> PlatformWallets { get; set; }
@@ -46,6 +47,7 @@ namespace Nilearn.Infrastructure.Persistence
             builder.ApplyConfiguration(new WalletTransactionConfiguration());
             builder.ApplyConfiguration(new InstructorWalletConfiguration());
             builder.ApplyConfiguration(new PlatformWalletConfiguration());
+            builder.ApplyConfiguration(new ReviewConfiguration());
 
             // Global query filter for soft delete
             builder.Entity<Category>().HasQueryFilter(e => !e.IsDeleted);
@@ -54,8 +56,11 @@ namespace Nilearn.Infrastructure.Persistence
             builder.Entity<Lesson>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Enrollment>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Payment>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Review>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<InstructorWallet>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<PlatformWallet>().HasQueryFilter(e => !e.IsDeleted);
 
-            
+
 
 
 
