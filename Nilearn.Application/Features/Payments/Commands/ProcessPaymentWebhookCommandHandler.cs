@@ -1,9 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
-using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Entities;
-using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
 
 namespace Nilearn.Application.Features.Payments.Commands
