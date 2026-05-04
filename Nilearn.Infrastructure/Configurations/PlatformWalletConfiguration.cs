@@ -7,6 +7,9 @@ internal class PlatformWalletConfiguration : IEntityTypeConfiguration<PlatformWa
 {
     public void Configure(EntityTypeBuilder<PlatformWallet> builder)
     {
+
+        builder.ToTable("PlatformWallets");
+
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Balance)

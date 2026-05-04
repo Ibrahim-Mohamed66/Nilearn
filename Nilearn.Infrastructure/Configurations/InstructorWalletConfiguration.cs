@@ -8,6 +8,8 @@ internal class InstructorWalletConfiguration : IEntityTypeConfiguration<Instruct
 {
     public void Configure(EntityTypeBuilder<InstructorWallet> builder)
     {
+
+        builder.ToTable("InstructorWallets");
         builder.HasKey(ins => ins.Id);
 
         builder.HasIndex(ins => ins.InstructorId)
