@@ -53,6 +53,8 @@ namespace Nilearn.API
                     policy.RequireRole(Role.Instructor.ToString()));
                 options.AddPolicy("StudentOnly", policy =>
                     policy.RequireRole(Role.Student.ToString()));
+                options.AddPolicy("SuperAdminOnly", policy =>
+                    policy.RequireRole(Role.SuperAdmin.ToString()));
             });
             builder.Services.AddCors(options =>
             {
