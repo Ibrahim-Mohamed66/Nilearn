@@ -19,6 +19,9 @@ public class Payment : BaseEntity
     public Enrollment? Enrollment { get; private set; }
     public uint Version { get; set; }
 
+
+    public ICollection<WalletTransaction> Transactions = new List<WalletTransaction>();
+
     public Payment(int enrollmentId, decimal amount, Currency currency = Currency.EGP)
     {
         EnrollmentId = enrollmentId;
