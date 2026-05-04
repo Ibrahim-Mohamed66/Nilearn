@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Interfaces;
+using Nilearn.Domain.Entities;
+using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
 
 namespace Nilearn.Application.Features.Payments.Commands
@@ -62,10 +64,66 @@ namespace Nilearn.Application.Features.Payments.Commands
                     orderId: request.OrderId.ToString()
                 );
 
+
                 _logger.LogInformation(
                     "Payment succeeded. PaymentId: {PaymentId}, TransactionId: {TransactionId}",
                     payment.Id,
                     request.TransactionId);
+
+                var instructorShare = payment.Amount * 0.8m; // Example: 80% to instructor
+                var platformShare = payment.Amount - instructorShare;
+
+                var enrollment = await _unitOfWork.EnrollmentRepository.GetByIdWithDetailsAsync(payment.EnrollmentId, cancellationToken);
+                if (enrollment is null)
+                    return Result<string>.FailureResponse(message: "Enrollment not found");
+
+                if (enrollment.Course is null)
+                    return Result<string>.FailureResponse(message: "Course not found for enrollment");
+
+
+                var instructorId = enrollment.Course.InstructorId;
+                var instructorWallet = await _unitOfWork.InstructorWalletRepository.GetByInstructorIdAsync(instructorId, cancellationToken);
+                if(instructorWallet is null)
+                {
+                    var instructorWalletEntity = new Domain.Entities.InstructorWallet
+                    {
+                        InstructorId = instructorId
+                    };
+                    instructorWalletEntity.Credit(instructorShare);
+                    await _unitOfWork.InstructorWalletRepository.AddAsync(instructorWalletEntity, cancellationToken);
+                }
+                else
+                {
+                    instructorWallet.Credit(instructorShare);
+                }
+                var platformWallet = await _unitOfWork.PlatformWalletRepository.GetAsync(cancellationToken);
+                if (platformWallet is null)
+                {
+                    var platformWalletEntity = new PlatformWallet();
+                    platformWalletEntity.Credit(platformShare);
+                    await _unitOfWork.PlatformWalletRepository.AddAsync(platformWalletEntity, cancellationToken);
+                }
+                else
+                {
+                    platformWallet.Credit(platformShare);
+                }
+
+                var InstructorTransaction = new WalletTransaction();
+                InstructorTransaction.Credit(instructorId, instructorShare,
+                    $"Earnings from payment {payment.Id} for {enrollment.Course.Title} for instructor {instructorId}",
+                    payment.Id);
+
+                var platformTransaction = new WalletTransaction();
+                platformTransaction.Credit(
+                    instructorId: null,
+                    amount: platformShare,
+                    description: $"Platform share from payment {payment.Id} for {enrollment.Course.Title} for instructor {instructorId}",
+                    paymentId: payment.Id
+                );
+                
+
+                await _unitOfWork.WalletTransactionRepository.AddAsync(InstructorTransaction, cancellationToken);
+                await _unitOfWork.WalletTransactionRepository.AddAsync(platformTransaction, cancellationToken);
             }
             else
             {
