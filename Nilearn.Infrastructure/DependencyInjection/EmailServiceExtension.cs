@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Infrastructure.Email;
+using Resend;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,9 +14,18 @@ namespace Nilearn.Infrastructure.DependencyInjection
     {
         public static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddTransient<IEmailService, EmailService>();
+            services.AddOptions();
+            services.AddHttpClient<ResendClient>();
+            services.Configure<ResendClientOptions>(o =>
+            {
+                o.ApiToken = configuration.GetSection("Resend")["ApiKey"] ?? string.Empty;
+            });
+            services.AddTransient<IResend, ResendClient>();
+
+            services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+            services.AddTransient<IEmailService, ResendEmailService>();
             services.AddTransient<IEmailTemplateRenderer, EmailTemplateRenderer>();
-            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            
             return services;
         }
     }
