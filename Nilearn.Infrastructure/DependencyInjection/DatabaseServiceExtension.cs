@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Nilearn.Domain.Interfaces;
 using Nilearn.Infrastructure.Initializer;
 using Nilearn.Infrastructure.Persistence;

@@ -30,7 +30,7 @@ namespace Nilearn.Application.Services
         public async Task SendVerificationEmailAsync(AppUser user,CancellationToken cancellationToken)
         {
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var verificationLink = $"{_config.FrontendUrl}/confirm/email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+            var verificationLink = $"{_config.BaseUrl}/auth/email-confirm?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
             var templateValues = new Dictionary<string, string>
             {
