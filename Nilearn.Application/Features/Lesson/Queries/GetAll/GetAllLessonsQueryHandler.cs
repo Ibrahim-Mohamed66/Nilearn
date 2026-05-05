@@ -54,6 +54,7 @@ internal sealed class GetAllLessonsQueryHandler : IRequestHandler<GetAllLessonsQ
                 Description = lesson.Description,
                 SectionId = lesson.SectionId,
                 LessonType = lesson.LessonType,
+                IsLocked = !lesson.IsPreview
                
             },
             LessonType.PDF => new LessonResponse
@@ -64,6 +65,7 @@ internal sealed class GetAllLessonsQueryHandler : IRequestHandler<GetAllLessonsQ
                 Description = lesson.Description,
                 SectionId = lesson.SectionId,
                 LessonType = lesson.LessonType,
+                IsLocked= !lesson.IsPreview
                
             },
             LessonType.Article => new LessonResponse
@@ -74,6 +76,7 @@ internal sealed class GetAllLessonsQueryHandler : IRequestHandler<GetAllLessonsQ
                 Description = lesson.Description,
                 SectionId = lesson.SectionId,
                 LessonType = lesson.LessonType,
+                IsLocked =!lesson.IsPreview
                
             },
             _ => throw new InvalidOperationException($"Unsupported lesson type: {lesson.LessonType}")

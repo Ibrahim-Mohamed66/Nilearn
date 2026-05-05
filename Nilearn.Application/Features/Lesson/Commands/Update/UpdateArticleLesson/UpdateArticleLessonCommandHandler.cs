@@ -106,7 +106,9 @@ namespace Nilearn.Application.Features.Lesson.Commands.Update.UpdateArticleLesso
                     Description = lesson.Description,
                     Order = lesson.Order,
                     SectionId = lesson.SectionId,
-                    LessonType = lesson.LessonType
+                    LessonType = lesson.LessonType,
+                    IsLocked = !lesson.IsPreview
+
                 };
                 return Result<LessonResponse>.SuccessResponse(lessonResponse, message: "Lesson updated successfully");
 

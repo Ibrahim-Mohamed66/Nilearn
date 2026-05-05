@@ -75,7 +75,7 @@ internal sealed class CreatePdfLessonCommandHandler : IRequestHandler<CreatePdfL
                 Description = lesson.Description,
                 LessonType = lesson.LessonType,
                 Order = lesson.Order,
-                
+                IsLocked = !lesson.IsPreview,
                 SectionId = lesson.SectionId,
             };
             return Result<LessonResponse>.SuccessResponse(response, "lesson created successfully");

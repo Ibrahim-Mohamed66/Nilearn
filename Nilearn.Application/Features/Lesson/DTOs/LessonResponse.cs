@@ -12,8 +12,8 @@ public record LessonResponse
 
     public LessonType LessonType { get; set; }
 
-    //public string? FileUrl { get; set; }
-    //public string? VideoUrl { get; set; }
-    //public string? ThumbnailUrl { get; set; }
-    //public string? Content { get; set; }
+    public bool IsLocked { get; set; }
+    public string? PdfUrl { get; set; }
+    public string? VideoUrl { get; set; }
+    public string? ArticleContent { get; set; }
 }

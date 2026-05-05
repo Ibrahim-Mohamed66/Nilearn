@@ -240,10 +240,14 @@ public class LessonController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetLessonById(int id, CancellationToken cancellationToken)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (id <= 0)
         {
             throw new BadRequestException("Invalid lesson ID.");
-        } var query = new GetLessonByIdQuery(id);
+        } 
+        
+       
+        var query = new GetLessonByIdQuery(id, userId);
         var result = await _mediator.Send(query, cancellationToken);
 
         return Ok(result);

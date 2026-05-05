@@ -67,6 +67,7 @@ internal sealed class CreateArticleLessonCommandHandler : IRequestHandler<Create
                 LessonType = lesson.LessonType,
                 Order = lesson.Order,
                 SectionId = lesson.SectionId,
+                IsLocked = !lesson.IsPreview
             };
 
             return Result<LessonResponse>.SuccessResponse(response, "lesson created successfully");

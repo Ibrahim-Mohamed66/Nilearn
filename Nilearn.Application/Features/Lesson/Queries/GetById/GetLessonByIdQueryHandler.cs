@@ -28,21 +28,43 @@ internal sealed class GetLessonByIdQueryHandler : IRequestHandler<GetLessonByIdQ
     public async Task<Result<LessonResponse>> Handle(GetLessonByIdQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Fetching lesson with ID: {LessonId}", request.Id);
-
+        
         var lesson = await _unitOfWork.LessonRepository.GetByIdAsync(request.Id, cancellationToken);
         if (lesson is null)
         {
             _logger.LogWarning("Lesson with ID: {LessonId} was not found.", request.Id);
             throw new NotFoundException("Lesson", request.Id);
         }
+               
+        var hasAccess = lesson.IsPreview;
 
-        var response = MapToResponse(lesson);
+        if (!hasAccess && !string.IsNullOrEmpty(request.UserId))
+        {
+            // Check if user is the instructor of the course
+            hasAccess = await _unitOfWork.SectionRepository.IsOwner(lesson.SectionId, request.UserId, cancellationToken);
+
+            if (!hasAccess)
+            {
+                // Check if user is enrolled
+                var student = await _unitOfWork.StudentRepository.GetByUserId(request.UserId, cancellationToken);
+                if (student is not null)
+                {
+                    var section = await _unitOfWork.SectionRepository.GetByIdAsync(lesson.SectionId, cancellationToken);
+                    if (section is not null)
+                    {
+                        hasAccess = await _unitOfWork.EnrollmentRepository.IsEnrolledAsync(student.Id, section.CourseId, cancellationToken);
+                    }
+                }
+            }
+        }
+
+        var response = MapToResponse(lesson, hasAccess);
 
         _logger.LogInformation("Successfully fetched lesson with ID: {LessonId}", request.Id);
         return Result<LessonResponse>.SuccessResponse(response, "Lesson fetched successfully.");
     }
 
-    private LessonResponse MapToResponse(Domain.Entities.Lesson lesson)
+    private LessonResponse MapToResponse(Domain.Entities.Lesson lesson, bool hasAccess)
     {
         return lesson.LessonType switch
         {
@@ -54,7 +76,10 @@ internal sealed class GetLessonByIdQueryHandler : IRequestHandler<GetLessonByIdQ
                 Description = lesson.Description,
                 SectionId = lesson.SectionId,
                 LessonType = lesson.LessonType,
-
+                IsLocked = !hasAccess,
+                VideoUrl = hasAccess && !string.IsNullOrEmpty(lesson.CloudinaryPublicId) ? _mediaService.GetVideoUrl(lesson.CloudinaryPublicId) : null,
+                PdfUrl = null,
+                ArticleContent = null
             },
             LessonType.PDF => new LessonResponse
             {
@@ -64,7 +89,10 @@ internal sealed class GetLessonByIdQueryHandler : IRequestHandler<GetLessonByIdQ
                 Description = lesson.Description,
                 SectionId = lesson.SectionId,
                 LessonType = lesson.LessonType,
-
+                IsLocked = !hasAccess,
+                PdfUrl = hasAccess && !string.IsNullOrEmpty(lesson.CloudinaryPublicId) ? _mediaService.GetDocumentUrl(lesson.CloudinaryPublicId) : null,
+                VideoUrl = null,
+                ArticleContent = null
             },
             LessonType.Article => new LessonResponse
             {
@@ -74,7 +102,10 @@ internal sealed class GetLessonByIdQueryHandler : IRequestHandler<GetLessonByIdQ
                 Description = lesson.Description,
                 SectionId = lesson.SectionId,
                 LessonType = lesson.LessonType,
-                
+                IsLocked = !hasAccess,
+                ArticleContent = hasAccess ? lesson.Content : null,
+                VideoUrl = null,
+                PdfUrl = null
             },
             _ => throw new InvalidOperationException($"Unsupported lesson type: {lesson.LessonType}")
         };

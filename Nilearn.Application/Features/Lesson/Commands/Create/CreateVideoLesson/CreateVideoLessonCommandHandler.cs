@@ -87,7 +87,7 @@ namespace Nilearn.Application.Features.Lesson.Commands.Create.CreateVideoLesson
                     LessonType = lesson.LessonType,
                     Order = lesson.Order,
                     SectionId = lesson.SectionId,
-                    
+                    IsLocked = !lesson.IsPreview,
                 };
 
                 return Result<LessonResponse>.SuccessResponse(response, "lesson created successfully");
