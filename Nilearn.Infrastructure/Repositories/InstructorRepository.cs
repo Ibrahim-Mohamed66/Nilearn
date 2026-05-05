@@ -6,10 +6,10 @@ using Nilearn.Infrastructure.Persistence;
 
 namespace Nilearn.Infrastructure.Repositories
 {
-    internal class InstructorRepositroy : IInstructorRepository
+    internal class InstructorRepository : IInstructorRepository
     {
         private readonly AppDbContext _context;
-        public InstructorRepositroy(AppDbContext context)
+        public InstructorRepository(AppDbContext context)
         {
             _context = context;
         }

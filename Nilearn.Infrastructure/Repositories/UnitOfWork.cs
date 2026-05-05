@@ -55,7 +55,7 @@ namespace Nilearn.Infrastructure.Repositories
         {
             get
             {
-                return _instructorRepository ??= new InstructorRepositroy(_context);
+                return _instructorRepository ??= new InstructorRepository(_context);
             }
         }
         public ICategoryRepository CategoryRepository
