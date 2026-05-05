@@ -14,6 +14,7 @@ namespace Nilearn.Domain.Interfaces
         public IPlatformWalletRepository PlatformWalletRepository { get; }
         public IInstructorWalletRepository InstructorWalletRepository { get; }
         public IWalletTransactionRepository WalletTransactionRepository { get; }
+        public IReviewRepository ReviewRepository { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(CancellationToken cancellationToken = default);

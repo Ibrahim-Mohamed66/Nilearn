@@ -30,7 +30,9 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
         // ⭐ Important business rule:
         // One review per student per course
         builder.HasIndex(r => new { r.CourseId, r.StudentId })
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = false");
+
 
         // Index for performance (course reviews queries)
         builder.HasIndex(r => r.CourseId);
