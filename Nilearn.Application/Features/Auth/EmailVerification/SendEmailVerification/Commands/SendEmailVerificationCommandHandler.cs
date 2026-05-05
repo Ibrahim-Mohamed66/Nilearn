@@ -40,7 +40,7 @@ namespace Nilearn.Application.Features.Auth.EmailVerification.SendEmailVerificat
                 throw new ConflictException("User", "Email already confirmed");
             }
 
-            await _emailVerificationService.SendVerificationEmailAsync(user, cancellationToken);
+            // await _emailVerificationService.SendVerificationEmailAsync(user, cancellationToken);
 
             _logger.LogInformation("Verification email sent successfully for user {UserId}.", request.UserId);
             return Result<string>.SuccessResponse("Success", "Verification email sent successfully");

@@ -41,7 +41,7 @@ namespace Nilearn.Application.Features.Auth.ForgotPassword.Commands
                 );
             }
 
-            await _forgotPasswordService.SendResetPasswordEmailAsync(user, cancellationToken);
+            // await _forgotPasswordService.SendResetPasswordEmailAsync(user, cancellationToken);
 
             _logger.LogInformation(
                 "Password reset email successfully queued for user {Email} at {UtcNow}",

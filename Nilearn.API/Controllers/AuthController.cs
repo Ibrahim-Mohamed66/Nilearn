@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerification.Commands;
@@ -92,34 +92,34 @@ namespace Nilearn.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("email-confirm")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailCommand command, CancellationToken cancellationToken)
-        {
-            var result = await _mediator.Send(command, cancellationToken);
+        // [HttpGet("email-confirm")]
+        // public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailCommand command, CancellationToken cancellationToken)
+        // {
+        //     var result = await _mediator.Send(command, cancellationToken);
 
-            if (!result.Success)
-                return BadRequest(result);
+        //     if (!result.Success)
+        //         return BadRequest(result);
 
-            return Ok(result);
-        }
+        //     return Ok(result);
+        // }
 
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
-        {
-            var result = await _mediator.Send(command, cancellationToken);
-            if (!result.Success)
-                return BadRequest(result);
-            return Ok(result);
-        }
+        // [HttpPost("forgot-password")]
+        // public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
+        // {
+        //     var result = await _mediator.Send(command, cancellationToken);
+        //     if (!result.Success)
+        //         return BadRequest(result);
+        //     return Ok(result);
+        // }
 
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken cancellationToken)
-        {
-            var result = await _mediator.Send(command, cancellationToken);
-            if (!result.Success)
-                return BadRequest(result);
-            return Ok(result);
-        }
+        // [HttpPost("reset-password")]
+        // public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command, CancellationToken cancellationToken)
+        // {
+        //     var result = await _mediator.Send(command, cancellationToken);
+        //     if (!result.Success)
+        //         return BadRequest(result);
+        //     return Ok(result);
+        // }
 
         #region Helpers
         private void SetRefreshTokenCookie(string refreshToken, DateTime expiresAt)

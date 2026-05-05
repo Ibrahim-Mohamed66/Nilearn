@@ -44,6 +44,7 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 DateOfBirth = request.DateOfBirth,
+                EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -77,20 +78,20 @@ namespace Nilearn.Application.Features.Auth.Register.Student.Commands
                 throw;
             }
 
-            try
-            {
-                await _emailVerificationService.SendVerificationEmailAsync(user, cancellationToken);
+            // try
+            // {
+            //     await _emailVerificationService.SendVerificationEmailAsync(user, cancellationToken);
 
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send verification email for user {UserId}.", user.Id);
-                // — user can request resend
-            }
+            // }
+            // catch (Exception ex)
+            // {
+            //     _logger.LogError(ex, "Failed to send verification email for user {UserId}.", user.Id);
+            //     // — user can request resend
+            // }
 
             return Result<string>.SuccessResponse(
                 "Success",
-                "User registered successfully. Please check your email to verify your account."
+                "User registered successfully."
             );
         }
     }

@@ -34,13 +34,13 @@ public class EnrollmentActivatedHandler : INotificationHandler<EnrollmentActivat
         var course = enrollment.Course;
         var instructorName = course.Instructor?.User?.FirstName ?? "Your Instructor";
 
-        await _emailService.SendEnrollmentActivatedEmailAsync(
-            student.Email,
-            student.FirstName,
-            course.Title,
-            instructorName,
-            course.Id,
-            cancellationToken);
+        // await _emailService.SendEnrollmentActivatedEmailAsync(
+        //     student.Email,
+        //     student.FirstName,
+        //     course.Title,
+        //     instructorName,
+        //     course.Id,
+        //     cancellationToken);
 
         _logger.LogInformation("Enrollment activation email queued for Student {StudentId} for Course {CourseId}",
             student.Id, course.Id);
