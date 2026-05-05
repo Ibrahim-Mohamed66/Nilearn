@@ -76,9 +76,11 @@ internal class CourseRepository : ICourseRepository
     {
         var query = _context.Courses
             .AsNoTracking()
+            .Where(c=> c.IsPublished) // Only include published courses
             .Include(c => c.Category)
             .Include(c => c.Instructor)
                 .ThenInclude(i => i.User)
+
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
