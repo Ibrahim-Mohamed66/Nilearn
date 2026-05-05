@@ -2,6 +2,7 @@ using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.PostgreSql;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi;
 using Nilearn.API.Hangfire;
 using Nilearn.API.Hangfire.Jobs;
 using Nilearn.API.Middlewares;
@@ -26,7 +27,7 @@ namespace Nilearn.API
             builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppConfiguration>>().Value);
             var configuration = builder.Configuration.GetSection("AppSettings").Get<AppConfiguration>();
 
-            builder.Host.UseSerilog((hostingContext, services,configuration) =>
+            builder.Host.UseSerilog((hostingContext, services, configuration) =>
             {
                 configuration
                 .ReadFrom.Configuration(hostingContext.Configuration)
@@ -79,22 +80,45 @@ namespace Nilearn.API
                     options.UseNpgsqlConnection(connectionString);
                 });
             });
-            
+
             builder.Services.AddHangfireServer();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddApplicationServices();
-            builder.Services.AddScoped<IEmailJobScheduler,HangfireEmailJobScheduler>();
+            builder.Services.AddScoped<IEmailJobScheduler, HangfireEmailJobScheduler>();
             builder.Services.AddScoped<IMediaJobScheduler, MediaJobScheduler>();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer"
+                });
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                });
+            });
+
+
+
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+
                 app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             //await app.SeedDatabaseAsync();
             app.UseCors("AllowFrontend");
