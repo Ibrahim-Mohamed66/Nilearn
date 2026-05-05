@@ -14,7 +14,7 @@ namespace Nilearn.API.Hangfire.Jobs
 
         public Task EnqueueEmailAsync(string to, string subject, string body, CancellationToken cancellationToken)
         {
-            BackgroundJob.Enqueue(() => _emailService.SendEmailAsync(to, subject, body,cancellationToken));
+            BackgroundJob.Enqueue(() => _emailService.SendEmailAsync(to, subject, body,CancellationToken.None));
             return Task.CompletedTask;
         }
     }

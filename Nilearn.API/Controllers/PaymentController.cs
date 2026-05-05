@@ -56,7 +56,6 @@ namespace Nilearn.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> HandlePaymobWebhook([FromQuery] string hmac,CancellationToken cancellationToken)
         {
-            Request.EnableBuffering();
             using var reader = new StreamReader(Request.Body);
             var payload = await reader.ReadToEndAsync();
 

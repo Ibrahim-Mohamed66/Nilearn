@@ -86,7 +86,6 @@ namespace Nilearn.API
             builder.Services.AddApplicationServices();
             builder.Services.AddScoped<IEmailJobScheduler,HangfireEmailJobScheduler>();
             builder.Services.AddScoped<IMediaJobScheduler, MediaJobScheduler>();
-            builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
