@@ -34,6 +34,7 @@ namespace Nilearn.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllCategories([FromQuery] GetAllCategoriesQuery query, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(query, cancellationToken);
@@ -41,6 +42,7 @@ namespace Nilearn.API.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCategoryById(int id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
