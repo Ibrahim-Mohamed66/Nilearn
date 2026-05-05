@@ -94,7 +94,7 @@
         {
             if (string.IsNullOrWhiteSpace(documentPublicId))
                 return string.Empty;
-            var url = _cloudinary.Api.Url.ResourceType("raw").Secure(true).BuildUrl(documentPublicId);
+            var url = _cloudinary.Api.Url.Secure(true).BuildUrl(documentPublicId);
             _logger.LogInformation("Generated URL for document {documentPublicId}: {Url}", documentPublicId, url);
             return url;
         }
@@ -169,7 +169,7 @@
             fileName = Path.GetFileName(fileName);
             try
             {
-                var uploadParams = new RawUploadParams
+                var uploadParams = new ImageUploadParams
                 {
                     File = new FileDescription(fileName, documentStream),
                     Folder = folder,
@@ -177,7 +177,7 @@
                     UniqueFilename = true,
                    
                 };
-                var result = await _cloudinary.UploadLargeRawAsync(uploadParams,cancellationToken: cancellationToken);
+                var result = await _cloudinary.UploadAsync(uploadParams,cancellationToken: cancellationToken);
                 if (result != null && result.StatusCode == System.Net.HttpStatusCode.OK && result.Error == null)
                 {
                     _logger.LogInformation("Document uploaded successfully: {FileName} → {PublicId}", fileName, result.PublicId);
