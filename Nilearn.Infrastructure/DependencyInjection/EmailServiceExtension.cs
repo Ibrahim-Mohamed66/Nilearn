@@ -18,11 +18,11 @@ namespace Nilearn.Infrastructure.DependencyInjection
             services.AddHttpClient<ResendClient>();
             services.Configure<ResendClientOptions>(o =>
             {
-                o.ApiToken = configuration.GetSection("Resend")["ApiKey"] ?? string.Empty;
+                o.ApiToken = configuration.GetSection("ResendSettings")["ApiKey"] ?? string.Empty;
             });
             services.AddTransient<IResend, ResendClient>();
 
-            services.Configure<ResendSettings>(configuration.GetSection("Resend"));
+            services.Configure<ResendSettings>(configuration.GetSection("ResendSettings"));
             services.AddTransient<IEmailService, ResendEmailService>();
             services.AddTransient<IEmailTemplateRenderer, EmailTemplateRenderer>();
             
