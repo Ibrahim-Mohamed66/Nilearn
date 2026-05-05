@@ -32,11 +32,13 @@ internal sealed class GetCoursePagedQueryHandler
     {
         _logger.LogInformation("Fetching courses: Page {Page}, Size {Size}", request.PageNumber, request.PageSize);
 
-        try
-        {
-            // Get paged courses from repository
-            var pagedCourses = await _unitOfWork.CourseRepository.GetPagedAsync(
-                request.PageNumber, request.PageSize, cancellationToken);
+        var pagedCourses = await _unitOfWork.CourseRepository.GetPagedAsync(
+            request.PageNumber, 
+            request.PageSize, 
+            request.SearchTerm,
+            request.CategoryName,
+            request.InstructorName,
+            cancellationToken);
 
             // Map to DTOs with projection
             var courseDtos = pagedCourses.Items
@@ -68,16 +70,6 @@ internal sealed class GetCoursePagedQueryHandler
             _logger.LogInformation("Successfully retrieved {Count} courses out of {TotalCount}",
                 pagedResult.Items.Count, pagedResult.TotalCount);
 
-            return  Result<PagedResponse<CourseDto>>.SuccessResponse(pagedResult, "Courses retrieved successfully.");
-            
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching courses for page {Page} with size {Size}",
-                request.PageNumber, request.PageSize);
-
-            return  Result<PagedResponse<CourseDto>>.FailureResponse(message: "Failed to fetch courses. Please try again later.");
-            
-        }
+        return  Result<PagedResponse<CourseDto>>.SuccessResponse(pagedResult, "Courses retrieved successfully.");
     }
 }

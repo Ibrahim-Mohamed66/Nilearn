@@ -14,7 +14,13 @@ public interface ICourseRepository
     IQueryable<Course> GetAll();
     Task<bool> AnyAsync(int courseId, CancellationToken cancellationToken = default);
     Task<Course?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken = default);
-    Task<PagedResponse<Course>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
+    Task<PagedResponse<Course>> GetPagedAsync(
+        int pageNumber, 
+        int pageSize, 
+        string? searchTerm = null, 
+        string? categoryName = null, 
+        string? instructorName = null, 
+        CancellationToken cancellationToken = default);
     IQueryable<Course> GetByInstructorId(int instructorId);
     Task<bool> IsOwner(int courseId, string userId, CancellationToken cancellationToken = default);
     

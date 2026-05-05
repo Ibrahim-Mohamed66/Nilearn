@@ -9,6 +9,7 @@ using Nilearn.Application.Features.Course.Commands.Delete;
 using Nilearn.Application.Features.Course.Commands.Update;
 using Nilearn.Application.Features.Course.Queries.GetById;
 using Nilearn.Application.Features.Course.Queries.GetByInstructorId;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Course.Queries.GetForUpdate;
 using Nilearn.Application.Features.Course.Queries.GetPaged;
 using Nilearn.Application.Features.Section.Queries.GetAll;
@@ -35,9 +36,10 @@ public class CourseController : ControllerBase
         if (userId is null)
             return Unauthorized();
 
-        if (request.Thumbnail is null)
-            return BadRequest(Result<string>.FailureResponse(message: "Thumbnail is required."));
-
+        if (request.Thumbnail == null || request.Thumbnail.Length == 0)
+        {
+            throw new BadRequestException("Thumbnail is required.");
+        }
         await using var stream = request.Thumbnail.OpenReadStream();
 
         var thumbnail = new FileUpload
@@ -60,9 +62,6 @@ public class CourseController : ControllerBase
         );
 
         var result = await _mediator.Send(command, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return CreatedAtAction(
             nameof(GetCourseById),
@@ -109,9 +108,6 @@ public class CourseController : ControllerBase
 
             var result = await _mediator.Send(command, cancellationToken);
 
-            if (!result.Success)
-                return BadRequest(result);
-
             return Ok(result);
         }
         finally
@@ -128,13 +124,10 @@ public class CourseController : ControllerBase
     public async Task<IActionResult> GetCourseById(int id, CancellationToken cancellationToken)
     {
         if (id <= 0)
-            return BadRequest(Result<string>.FailureResponse(message: "Invalid course ID."));
+            throw new BadRequestException("Invalid course ID.");
 
         var query = new GetCourseByIdQuery(id);
         var result = await _mediator.Send(query, cancellationToken);
-
-        if (!result.Success)
-            return NotFound(result);
 
         return Ok(result);
     }
@@ -144,13 +137,10 @@ public class CourseController : ControllerBase
     public async Task<IActionResult> GetCourseForUpdate(int id, CancellationToken cancellationToken)
     {
         if (id <= 0)
-            return BadRequest(Result<string>.FailureResponse(message: "Invalid course ID."));
+            throw new BadRequestException("Invalid course ID.");
 
         var query = new GetCourseForUpdateQuery(id);
         var result = await _mediator.Send(query, cancellationToken);
-
-        if (!result.Success)
-            return NotFound(result);
 
         return Ok(result);
     }
@@ -160,19 +150,21 @@ public class CourseController : ControllerBase
     public async Task<IActionResult> GetAllCourses(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? categoryName = null,
+        [FromQuery] string? instructorName = null,
         CancellationToken cancellationToken = default)
     {
         if (pageNumber <= 0 || pageSize <= 0)
-            return BadRequest(Result<string>.FailureResponse(message: "Page number and page size must be greater than zero."));
-
+        {
+            throw new BadRequestException("Page number and page size must be greater than zero.");
+        }
         if (pageSize > 50)
-            return BadRequest(Result<string>.FailureResponse(message: "Page size cannot exceed 50."));
-
-        var query = new GetCoursePagedQuery(pageNumber, pageSize);
+        {
+            throw new BadRequestException("Page size cannot exceed 50.");
+        }
+        var query = new GetCoursePagedQuery(pageNumber, pageSize, searchTerm, categoryName, instructorName);
         var result = await _mediator.Send(query, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return Ok(result);
     }
@@ -187,11 +179,11 @@ public class CourseController : ControllerBase
             return Unauthorized();
 
         if (string.IsNullOrEmpty(userId))
-            return BadRequest(Result<string>.FailureResponse(message: "Instructor ID must be provided."));
+        {
+            throw new BadRequestException("Instructor ID must be provided.");
+        }
         var query = new GetCoursesByInstructorIdQuery(userId);
         var result = await _mediator.Send(query, cancellationToken);
-        if (!result.Success)
-            return NotFound(result);
         return Ok(result);
 
 
@@ -203,10 +195,6 @@ public class CourseController : ControllerBase
     public async Task<IActionResult> GetSectionsByCourseIdAsync([FromRoute] GetAllSectionsQuery query, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(query, cancellationToken);
-        if (!result.Success)
-        {
-            return NotFound(result);
-        }
         return Ok(result);
 
     }
@@ -221,9 +209,6 @@ public class CourseController : ControllerBase
 
         var command = new DeleteCourseCommand(id,userId);
         var result = await _mediator.Send(command, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return Ok(result);
     }

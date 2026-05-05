@@ -66,13 +66,35 @@ internal class CourseRepository : ICourseRepository
         _context.Courses.Update(course);
     }
 
-    public async Task<PagedResponse<Course>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResponse<Course>> GetPagedAsync(
+        int pageNumber, 
+        int pageSize, 
+        string? searchTerm = null, 
+        string? categoryName = null, 
+        string? instructorName = null, 
+        CancellationToken cancellationToken = default)
     {
         var query = _context.Courses
             .AsNoTracking()
             .Include(c => c.Category)
             .Include(c => c.Instructor)
-                .ThenInclude(i => i.User);
+                .ThenInclude(i => i.User)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(c => c.Title.Contains(searchTerm));
+        }
+
+        if (!string.IsNullOrWhiteSpace(categoryName))
+        {
+            query = query.Where(c => c.Category.Name.Contains(categoryName));
+        }
+
+        if (!string.IsNullOrWhiteSpace(instructorName))
+        {
+            query = query.Where(c => (c.Instructor.User.FirstName + " " + c.Instructor.User.LastName).Contains(instructorName));
+        }
 
         return await query.ToPagedAsync(pageNumber, pageSize, cancellationToken);
     }
