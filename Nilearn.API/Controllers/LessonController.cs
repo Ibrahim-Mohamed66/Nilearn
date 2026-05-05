@@ -13,6 +13,7 @@ using Nilearn.Application.Features.Lesson.Queries.GetById;
 using Nilearn.Application.Features.Lesson.Queries.GetAll;
 using System.Security.Claims;
 using Nilearn.Application.Features.Lesson.Commands.Delete;
+using Nilearn.Application.Common.Exceptions;
 
 namespace Nilearn.API.Controllers;
 
@@ -46,9 +47,6 @@ public class LessonController : ControllerBase
         );
 
         var result = await _mediator.Send(command, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return CreatedAtAction(nameof(GetLessonById), new { id = result.Data!.Id }, result);
     }
@@ -85,9 +83,6 @@ public class LessonController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        if (!result.Success)
-            return BadRequest(result);
-
         return CreatedAtAction(nameof(GetLessonById), new { id = result.Data!.Id }, result);
     }
 
@@ -99,10 +94,10 @@ public class LessonController : ControllerBase
         if (userId is null)
             return Unauthorized();
 
-        if (request.PdfFile is null)
-            return BadRequest(Result<string>.FailureResponse(message: "PDF file is required."));
-
-        await using var stream = request.PdfFile.OpenReadStream();
+        if (request.PdfFile == null || request.PdfFile.Length == 0)
+        {
+            throw new BadRequestException("PDF file is required.");
+        } await using var stream = request.PdfFile.OpenReadStream();
 
         var pdfFileUpload = new FileUpload
         {
@@ -123,9 +118,6 @@ public class LessonController : ControllerBase
         );
 
         var result = await _mediator.Send(command, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return Ok(result);
     }
@@ -165,9 +157,6 @@ public class LessonController : ControllerBase
             );
 
             var result = await _mediator.Send(command, cancellationToken);
-
-            if (!result.Success)
-                return BadRequest(result);
 
             return Ok(result);
         }
@@ -214,9 +203,6 @@ public class LessonController : ControllerBase
 
             var result = await _mediator.Send(command, cancellationToken);
 
-            if (!result.Success)
-                return BadRequest(result);
-
             return Ok(result);
         }
         finally
@@ -247,9 +233,6 @@ public class LessonController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        if (!result.Success)
-            return BadRequest(result);
-
         return Ok(result);
     }
 
@@ -258,13 +241,10 @@ public class LessonController : ControllerBase
     public async Task<IActionResult> GetLessonById(int id, CancellationToken cancellationToken)
     {
         if (id <= 0)
-            return BadRequest(Result<string>.FailureResponse(message: "Invalid lesson ID."));
-
-        var query = new GetLessonByIdQuery(id);
+        {
+            throw new BadRequestException("Invalid lesson ID.");
+        } var query = new GetLessonByIdQuery(id);
         var result = await _mediator.Send(query, cancellationToken);
-
-        if (!result.Success)
-            return NotFound(result);
 
         return Ok(result);
     }
@@ -276,9 +256,6 @@ public class LessonController : ControllerBase
 
         var query = new GetAllLessonsQuery(sectionId);
         var result = await _mediator.Send(query, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return Ok(result);
     }
@@ -293,9 +270,6 @@ public class LessonController : ControllerBase
 
         var command = new DeleteLessonCommand(id, sectionId, userId);
         var result = await _mediator.Send(command, cancellationToken);
-
-        if (!result.Success)
-            return BadRequest(result);
 
         return Ok(result);  
     }

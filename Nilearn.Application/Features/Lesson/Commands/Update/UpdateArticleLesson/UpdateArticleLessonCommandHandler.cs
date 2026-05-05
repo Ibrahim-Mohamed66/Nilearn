@@ -1,6 +1,7 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Lesson.DTOs;
 using Nilearn.Domain.Interfaces;
 
@@ -23,30 +24,30 @@ namespace Nilearn.Application.Features.Lesson.Commands.Update.UpdateArticleLesso
             if(lesson is  null) 
             {
                _logger.LogWarning("Lesson with id {LessonId} not found", request.Id);
-                return Result<LessonResponse>.FailureResponse(message: "Lesson not found");
+                throw new NotFoundException("Lesson", request.Id);
             }
             else if(lesson.LessonType != Domain.Enums.LessonType.Article)
             {
                 _logger.LogWarning("Lesson with id {LessonId} is not an article lesson", request.Id);
-                return Result<LessonResponse>.FailureResponse(message: "Invalid lesson type");
+                throw new BadRequestException("Invalid lesson type. Expected Article.");
             }
             if(lesson.SectionId != request.sectionId)
             {
                 _logger.LogWarning("Lesson with id {LessonId} does not belong to section with id {SectionId}", lesson.Id, request.sectionId);
-                return Result<LessonResponse>.FailureResponse(message: "Lesson does not belong to the specified section");
+                throw new BadRequestException("Lesson does not belong to the specified section.");
             }
 
             var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.sectionId, cancellationToken);
             if(section is null)
             {
                 _logger.LogWarning("Section with id {SectionId} not found", request.sectionId);
-                return Result<LessonResponse>.FailureResponse(message: "Section not found");
+                throw new NotFoundException("Section", request.sectionId);
             }
             var isOwner = await _unitOfWork.CourseRepository.IsOwner(section.CourseId, request.UserId, cancellationToken);
             if (!isOwner)
             {
                 _logger.LogWarning("User with id {UserId} is not the owner of the course with id {CourseId}", request.UserId, section.CourseId);
-                return Result<LessonResponse>.FailureResponse(["Unauthorized Access"],message: "You Can't Update This Lesson");
+                throw new ForbiddenAccessException("You are not authorized to update this lesson.");
             }
             var maxOrder = await _unitOfWork.LessonRepository.GetMaxOrderAsync(request.sectionId, cancellationToken);
 

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Lesson.DTOs;
 using Nilearn.Domain.Interfaces;
@@ -26,30 +27,30 @@ namespace Nilearn.Application.Features.Lesson.Commands.Update.UpdatePdfLesson
             if (lesson is null)
             {
                 _logger.LogWarning("Lesson with id {LessonId} not found", request.Id);
-                return Result<LessonResponse>.FailureResponse(message: "Lesson not found");
+                throw new NotFoundException("Lesson", request.Id);
             }
             else if (lesson.LessonType != Domain.Enums.LessonType.PDF)
             {
                 _logger.LogWarning("Lesson with id {LessonId} is not a PDF lesson", request.Id);
-                return Result<LessonResponse>.FailureResponse(message: "Invalid lesson type");
+                throw new BadRequestException("Invalid lesson type. Expected PDF.");
             }
             if (lesson.SectionId != request.SectionId)
             {
                 _logger.LogWarning("Lesson with id {LessonId} does not belong to section with id {SectionId}", lesson.Id, request.SectionId);
-                return Result<LessonResponse>.FailureResponse(message: "Lesson does not belong to the specified section");
+                throw new BadRequestException("Lesson does not belong to the specified section.");
             }
 
             var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.SectionId, cancellationToken);
             if (section is null)
             {
                 _logger.LogWarning("Section with id {SectionId} not found", request.SectionId);
-                return Result<LessonResponse>.FailureResponse(message: "Section not found");
+                throw new NotFoundException("Section", request.SectionId);
             }
             var isOwner = await _unitOfWork.CourseRepository.IsOwner(section.CourseId, request.UserId, cancellationToken);
             if (!isOwner)
             {
                 _logger.LogWarning("User with id {UserId} is not the owner of the course with id {CourseId}", request.UserId, section.CourseId);
-                return Result<LessonResponse>.FailureResponse(["Unauthorized Access"], message: "You Can't Update This Lesson");
+                throw new ForbiddenAccessException("You are not authorized to update this lesson.");
             }
 
             var maxOrder = await _unitOfWork.LessonRepository.GetMaxOrderAsync(request.SectionId, cancellationToken);
@@ -76,7 +77,7 @@ namespace Nilearn.Application.Features.Lesson.Commands.Update.UpdatePdfLesson
                 if (pdfUploadResult is null)
                 {
                     _logger.LogError("Failed to upload PDF for lesson {LessonId}", lesson.Id);
-                    return Result<LessonResponse>.FailureResponse(["Failed to upload PDF"], "Failed to update PDF lesson");
+                    throw new BadRequestException("Failed to upload PDF");
                 }
                 oldPublicId = lesson.CloudinaryPublicId;
             }

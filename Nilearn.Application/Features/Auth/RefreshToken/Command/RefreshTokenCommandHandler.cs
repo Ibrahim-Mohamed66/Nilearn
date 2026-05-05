@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Auth.Login.DTOs;
 using Nilearn.Domain.Entities;
@@ -30,16 +31,13 @@ namespace Nilearn.Application.Features.Auth.RefreshToken.Command
             if (user == null)
             {
                 _logger.LogWarning("Refresh token not found or no user associated with token: {Token}", request.RefreshToken);
-                return Result<LoginResponseDto>.FailureResponse(
-                    new List<string> { "Refresh token not found." },
-                    "Token refresh failed."
-                );
+                throw new UnauthorizedException("Refresh token not found.");
             }
             var userToken =  user.RefreshTokens.FirstOrDefault(rt => rt.Token == request.RefreshToken);
             if (userToken == null || userToken.IsRevoked)
             {
                 _logger.LogWarning("Refresh token expired or not found for user: {UserId}", user.Id);
-                return Result<LoginResponseDto>.FailureResponse(new List<string> { "Refresh token expired or not found." }, "Token refresh failed.");
+                throw new UnauthorizedException("Refresh token expired or not found.");
             }
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -80,7 +78,7 @@ namespace Nilearn.Application.Features.Auth.RefreshToken.Command
             {
                 _logger.LogError(ex, "Error occurred while refreshing token for user: {UserId}", user.Id);
                  await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                 return Result<LoginResponseDto>.FailureResponse(new List<string> { "An error occurred while refreshing the token." }, "Token refresh failed.");
+                 throw;
             }
         }
     }

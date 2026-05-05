@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Lesson.DTOs;
 using Nilearn.Domain.Enums;
@@ -32,7 +33,7 @@ internal sealed class GetLessonByIdQueryHandler : IRequestHandler<GetLessonByIdQ
         if (lesson is null)
         {
             _logger.LogWarning("Lesson with ID: {LessonId} was not found.", request.Id);
-            return Result<LessonResponse>.FailureResponse(message: "Lesson not found.");
+            throw new NotFoundException("Lesson", request.Id);
         }
 
         var response = MapToResponse(lesson);

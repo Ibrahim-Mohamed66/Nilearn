@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Lesson.DTOs;
 using Nilearn.Domain.Enums;
@@ -26,9 +27,7 @@ internal sealed class CreatePdfLessonCommandHandler : IRequestHandler<CreatePdfL
         if (!isOwner)
         {
             _logger.LogWarning("User {UserId} is not the owner of section {SectionId}", request.UserId, request.SectionId);
-            return Result<LessonResponse>.FailureResponse(
-                 ["Unauthorized access."],
-                "Failed to create PDF lesson");
+            throw new ForbiddenAccessException("You are not authorized to create lessons in this section.");
         }
 
        
@@ -37,7 +36,7 @@ internal sealed class CreatePdfLessonCommandHandler : IRequestHandler<CreatePdfL
         if (pdfUploadResult == null)
         {
             _logger.LogError("Failed to upload PDF for lesson {LessonTitle}", request.Title);
-            return Result<LessonResponse>.FailureResponse(["Failed to upload PDF"], "Failed to create PDF lesson");
+            throw new BadRequestException("Failed to upload PDF");
         }
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try

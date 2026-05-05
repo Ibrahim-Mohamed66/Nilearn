@@ -31,10 +31,6 @@ namespace Nilearn.API.Controllers
 
             command = command with { UserId = userId };
             var result = await _mediator.Send(command, cancellationToken);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
             return Ok(result);
         }
 
@@ -48,10 +44,6 @@ namespace Nilearn.API.Controllers
 
             command = command with { Id = id, UserId = userId };
             var result = await _mediator.Send(command, cancellationToken);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
             return Ok(result);
         }
 
@@ -65,10 +57,6 @@ namespace Nilearn.API.Controllers
 
             var command = new DeleteSectionCommand(id, courseId, userId);
             var result = await _mediator.Send(command, cancellationToken);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
             return Ok(result);
         }
 
@@ -78,10 +66,6 @@ namespace Nilearn.API.Controllers
         {
             var query = new GetSectionByIdQuery(id, courseId);
             var result = await _mediator.Send(query, cancellationToken);
-            if (!result.Success)
-            {
-                return NotFound(result);
-            }
             return Ok(result);
         }
 
@@ -92,9 +76,6 @@ namespace Nilearn.API.Controllers
 
             var query = new GetAllLessonsQuery(sectionId);
             var result = await _mediator.Send(query, cancellationToken);
-
-            if (!result.Success)
-                return BadRequest(result);
 
             return Ok(result);
         }

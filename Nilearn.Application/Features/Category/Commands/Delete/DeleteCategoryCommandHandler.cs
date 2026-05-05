@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Domain.Interfaces;
+using Nilearn.Application.Common.Exceptions;
 
 namespace Nilearn.Application.Features.Category.Commands.DeleteCategory;
 
@@ -23,13 +24,13 @@ internal sealed class DeleteCategoryCommandHandler : IRequestHandler<DeleteCateg
         var existing = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (existing is null)
         {
-            return Result<string>.FailureResponse(message:"Category not found." );
+            throw new NotFoundException("Category", request.Id);
         }
 
         var deleted = await _unitOfWork.CategoryRepository.DeleteAsync(request.Id, cancellationToken);
         if (!deleted)
         {
-            return Result<string>.FailureResponse(message: "Failed to delete category.");
+            throw new NotFoundException("Category", request.Id);
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);

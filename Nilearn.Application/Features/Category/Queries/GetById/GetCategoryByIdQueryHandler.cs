@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Category.DTOs;
 using Nilearn.Domain.Interfaces;
 
@@ -24,9 +25,7 @@ internal sealed class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryB
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category is null)
         {
-            return Result<CategoryDto>.FailureResponse(
-                new List<string> { "Category not found." },
-                "Category not found.");
+            throw new NotFoundException("Category", request.Id);
         }
 
         var dto = new CategoryDto

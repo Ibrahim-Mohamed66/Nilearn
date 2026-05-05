@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Wallets.DTOs;
 using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
@@ -25,7 +26,7 @@ public class GetInstructorEarningsSummaryQueryHandler : IRequestHandler<GetInstr
         if(instructorId is null)
         {
             _logger.LogInformation("Instructor not found for user ID: {UserId}", request.UserId);
-            return Result<EarningsSummaryDto>.FailureResponse(message: "Instructor not found.");
+            throw new NotFoundException("Instructor", request.UserId);
         }
         var wallet = await _unitOfWork.InstructorWalletRepository.GetByInstructorIdAsync(instructorId.Value, cancellationToken);
         if (wallet == null)

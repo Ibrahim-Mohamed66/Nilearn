@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Enrollment.Commands.Create.DTOs;
 using Nilearn.Domain.Entities;
@@ -29,7 +30,7 @@ internal class EnrollmentService : IEnrollmentService
         if (student is null)
         {
             _logger.LogWarning("Enrollment failed: Student not found for UserId {UserId}", userId);
-            return Result<CreateEnrollmentResponse>.FailureResponse(message: "Student not found");
+            throw new NotFoundException("Student", userId);
         }
 
         var course = await _unitOfWork.CourseRepository
@@ -38,7 +39,7 @@ internal class EnrollmentService : IEnrollmentService
         if (course is null)
         {
             _logger.LogWarning("Enrollment failed: Course not found for CourseId {CourseId}", courseId);
-            return Result<CreateEnrollmentResponse>.FailureResponse(message: "Course not found");
+            throw new NotFoundException("Course", courseId);
         }
 
         var enrollment = await _unitOfWork.EnrollmentRepository
@@ -71,13 +72,13 @@ internal class EnrollmentService : IEnrollmentService
         catch (DbUpdateException ex)
         {
             _logger.LogWarning(ex, "Database constraint violation for UserId {UserId}", userId);
-            return Result<CreateEnrollmentResponse>.FailureResponse(message: "Student already enrolled.");
+            throw new ConflictException("Enrollment", "Student already enrolled.");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Paymob failed for UserId {UserId}. Rolling back DB records.", userId);
             await RollbackFailedEnrollmentAsync(payment, enrollment, isFree, cancellationToken);
-            return Result<CreateEnrollmentResponse>.FailureResponse(message: "Payment gateway unavailable. Please try again.");
+            throw new BadRequestException("Payment gateway unavailable. Please try again.");
         }
     }
 
@@ -107,14 +108,14 @@ internal class EnrollmentService : IEnrollmentService
         else if (enrollment.IsActive)
         {
             _logger.LogInformation("Student {StudentId} already enrolled in Course {CourseId}", student.Id, course.Id);
-            return Result<CreateEnrollmentResponse>.FailureResponse(message: "Student already enrolled in this course");
+            throw new ConflictException("Enrollment", "Student already enrolled in this course.");
         }
         
         var existingPayments = await _unitOfWork.PaymentRepository.GetByEnrollmentIdAsync(enrollment.Id, cancellationToken);
         if (existingPayments.Any(p => p.IsPending))
         {
             _logger.LogInformation("Student {StudentId} already has a pending payment for Course {CourseId}", student.Id, course.Id);
-            return Result<CreateEnrollmentResponse>.FailureResponse(message: "A payment is already pending for this course.");
+            throw new ConflictException("Payment", "A payment is already pending for this course.");
         }
 
         return null;

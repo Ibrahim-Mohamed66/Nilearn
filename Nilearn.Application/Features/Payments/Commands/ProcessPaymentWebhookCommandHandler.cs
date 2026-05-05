@@ -1,6 +1,7 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Interfaces;
 
@@ -31,7 +32,7 @@ namespace Nilearn.Application.Features.Payments.Commands
                 _logger.LogWarning("Webhook received without MerchantReferenceId. TransactionId: {TransactionId}",
                     request.TransactionId);
 
-                return Result<string>.FailureResponse(message: "Missing merchant reference id");
+                throw new BadRequestException("Missing merchant reference id.");
             }
 
             // 2. Load payment by merchant reference (your internal key)
@@ -44,7 +45,7 @@ namespace Nilearn.Application.Features.Payments.Commands
                     request.MerchantReferenceId,
                     request.TransactionId);
 
-                return Result<string>.FailureResponse(message:"Payment not found");
+                throw new NotFoundException("Payment", request.MerchantReferenceId);
             }
 
             // 3. Idempotency check (VERY IMPORTANT for webhooks)
@@ -73,10 +74,10 @@ namespace Nilearn.Application.Features.Payments.Commands
 
                 var enrollment = await _unitOfWork.EnrollmentRepository.GetByIdWithDetailsAsync(payment.EnrollmentId, cancellationToken);
                 if (enrollment is null)
-                    return Result<string>.FailureResponse(message: "Enrollment not found");
+                    throw new NotFoundException("Enrollment", payment.EnrollmentId);
 
                 if (enrollment.Course is null)
-                    return Result<string>.FailureResponse(message: "Course not found for enrollment");
+                    throw new NotFoundException("Course");
 
 
                 var instructorId = enrollment.Course.InstructorId;

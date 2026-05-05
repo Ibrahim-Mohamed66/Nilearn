@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
@@ -6,6 +6,7 @@ using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Entities;
 using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
+using Nilearn.Application.Common.Exceptions;
 
 namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
 {
@@ -33,8 +34,7 @@ namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
             if (await _userManager.FindByEmailAsync(request.Email) != null)
             {
                 _logger.LogWarning("Registration failed: email {Email} is already in use.", request.Email);
-                return Result<string>.FailureResponse(
-                    new List<string> { "Email is already in use." }, "Email is already in use.");
+                throw new ConflictException("User", "Email is already in use.");
             }
 
             var user = new AppUser
@@ -51,8 +51,7 @@ namespace Nilearn.Application.Features.Auth.Register.Instructor.Commands
             {
                 _logger.LogWarning("Registration failed for {Email}: {Errors}",
                             user.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
-                return Result<string>.FailureResponse(
-                    result.Errors.Select(e => e.Description).ToList(), "Registration failed");
+                throw new BadRequestException("Registration failed", result.Errors.Select(e => e.Description));
             }
 
             var instructorProfile = new Nilearn.Domain.Entities.Instructor

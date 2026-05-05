@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Section.DTOs;
 using Nilearn.Domain.Interfaces;
 
@@ -30,17 +31,13 @@ internal sealed class DeleteSectionCommandHandler : IRequestHandler<DeleteSectio
                 "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
                 request.CourseId, request.UserId);
 
-            return Result<string>.FailureResponse(
-                ["Unauthorized access."],
-                "Failed to delete section.");
+            throw new ForbiddenAccessException("You are not authorized to delete sections in this course.");
         }
         var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.Id, cancellationToken);
         if (section is null)
         {
             _logger.LogWarning("Section not found | SectionId: {SectionId}", request.Id);
-            return Result<string>.FailureResponse(
-                ["Section not found."],
-                "Failed to delete section.");
+            throw new NotFoundException("Section", request.Id);
         }
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         try
@@ -50,7 +47,7 @@ internal sealed class DeleteSectionCommandHandler : IRequestHandler<DeleteSectio
             if (!deleted)
             {
                
-                return Result<string>.FailureResponse(message: "Failed to delete section.");
+                throw new BadRequestException("Failed to delete section.");
             }
             
 

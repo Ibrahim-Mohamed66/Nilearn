@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Course.DTOs;
 using Nilearn.Application.Features.Course.Queries.GetById;
@@ -34,7 +35,7 @@ internal sealed class GetCourseByIdQueryHandler
         if (course is null)
         {
             _logger.LogWarning("Course with ID: {CourseId} was not found.", request.Id);
-            return Result<CourseDto>.FailureResponse(message:"Course is Not Found" );
+            throw new NotFoundException("Course", request.Id);
         }
         var dto = new CourseDto
         {

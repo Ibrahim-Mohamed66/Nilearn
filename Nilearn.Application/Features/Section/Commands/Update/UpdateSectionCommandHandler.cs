@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Section.DTOs;
 using Nilearn.Domain.Interfaces;
 
@@ -28,18 +29,14 @@ internal sealed class UpdateSectionCommandHandler : IRequestHandler<UpdateSectio
                 "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
                 request.CourseId, request.UserId);
 
-            return Result<SectionResponse>.FailureResponse(
-                ["Unauthorized access."],
-                "Failed to update section.");
+            throw new ForbiddenAccessException("You are not authorized to update sections in this course.");
         }
 
         var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.Id, cancellationToken);
         if (section is null)
         {
             _logger.LogWarning("Section not found | SectionId: {SectionId}", request.Id);
-            return Result<SectionResponse>.FailureResponse(
-                ["Section not found."],
-                "Failed to update section.");
+            throw new NotFoundException("Section", request.Id);
         }
 
 
@@ -48,9 +45,7 @@ internal sealed class UpdateSectionCommandHandler : IRequestHandler<UpdateSectio
             _logger.LogWarning(
                 "Section does not belong to course | SectionId: {SectionId} | CourseId: {CourseId}",
                 request.Id, request.CourseId);
-            return Result<SectionResponse>.FailureResponse(
-                ["Section does not belong to the specified course."],
-                "Failed to update section.");
+            throw new BadRequestException("Section does not belong to the specified course.");
         }
 
 

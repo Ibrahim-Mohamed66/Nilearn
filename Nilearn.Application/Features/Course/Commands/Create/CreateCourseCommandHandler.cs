@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Course.DTOs;
 using Nilearn.Domain.Interfaces;
@@ -47,7 +48,7 @@ internal sealed class CreateCourseCommandHandler : IRequestHandler<CreateCourseC
         if(instructorId == null )
         {
             _logger.LogError("Instructor not found for UserId: {UserId}", request.UserId);
-            throw new InvalidOperationException("Instructor not found for the given UserId.");
+            throw new NotFoundException("Instructor", request.UserId);
         }
         var slug = GenerateSlug(request.Title);
 

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Section.DTOs;
 using Nilearn.Domain.Interfaces;
 
@@ -33,9 +34,7 @@ namespace Nilearn.Application.Features.Section.Commands.Create
                     "Unauthorized access | CourseId: {CourseId} | UserId: {UserId}",
                     request.CourseId, request.UserId);
 
-                return Result<SectionResponse>.FailureResponse(
-                    ["Unauthorized access."],
-                    "Failed to create section.");
+                throw new ForbiddenAccessException("You are not authorized to create sections in this course.");
             }
             
             await _unitOfWork.BeginTransactionAsync(cancellationToken);

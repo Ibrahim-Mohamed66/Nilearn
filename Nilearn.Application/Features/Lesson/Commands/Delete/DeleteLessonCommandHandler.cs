@@ -1,6 +1,7 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Interfaces;
 
@@ -25,20 +26,20 @@ namespace Nilearn.Application.Features.Lesson.Commands.Delete
             if (lesson is null)
             {
                 _logger.LogWarning("Lesson {LessonId} not found.", request.Id);
-                return Result<string>.FailureResponse(message: "Lesson not found.");
+                throw new NotFoundException("Lesson", request.Id);
             }
             var section = await _unitOfWork.SectionRepository.GetByIdAsync(lesson.SectionId, cancellationToken);
             if (section is null)
             {
                 _logger.LogWarning("Section {SectionId} not found for lesson {LessonId}.", lesson.SectionId, request.Id);
-                return Result<string>.FailureResponse(message: "Section not found for this lesson.");
+                throw new NotFoundException("Section", lesson.SectionId);
             }
 
             var isOwner = await _unitOfWork.CourseRepository.IsOwner(section.CourseId, request.UserId,cancellationToken);
             if(!isOwner)
             {
                 _logger.LogWarning("User {UserId} attempted to delete lesson {LessonId} in course {CourseId} without ownership.", request.UserId, request.Id, section.CourseId);
-                return Result<string>.FailureResponse(message: "You do not have permission to delete this lesson.");
+                throw new ForbiddenAccessException("You do not have permission to delete this lesson.");
             }
             
             try
@@ -51,7 +52,7 @@ namespace Nilearn.Application.Features.Lesson.Commands.Delete
                     await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                     _logger.LogWarning("Failed to delete lesson {LessonId} in course {CourseId}.", request.Id, section.CourseId);
                    
-                    return Result<string>.FailureResponse(message: "Failed to delete lesson.");
+                    throw new BadRequestException("Failed to delete lesson.");
                 }
                 await _unitOfWork.LessonRepository.DecrementOrderFromAsync(lesson.SectionId, lesson.Order + 1, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

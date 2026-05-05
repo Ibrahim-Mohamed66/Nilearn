@@ -17,16 +17,5 @@
                 Message = message
             };
         }
-
-        // Failure response
-        public static Result<T> FailureResponse(List<string> errors = null, string message = "")
-        {
-            return new Result<T>
-            {
-                Success = false,
-                Errors = errors,
-                Message = message
-            };
-        }
     }
 }

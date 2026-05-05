@@ -1,9 +1,10 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Auth.Login.DTOs;
 using Nilearn.Domain.Entities;
@@ -33,7 +34,7 @@ namespace Nilearn.Application.Features.Auth.Login.Commands
             if (user == null)
             {
                 _logger.LogWarning("Login attempt failed for email: {Email}", request.Email);
-                return Result<LoginResponseDto>.FailureResponse(new List<string> { "Invalid email or password." }, "Login failed.");
+                throw new UnauthorizedException("Invalid email or password.");
             }
             
             var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
@@ -41,14 +42,14 @@ namespace Nilearn.Application.Features.Auth.Login.Commands
             {
                 await _userManager.AccessFailedAsync(user);
                 _logger.LogWarning("Login attempt failed for email: {Email}", request.Email);
-                return Result<LoginResponseDto>.FailureResponse(new List<string> { "Invalid email or password." }, "Login failed.");
+                throw new UnauthorizedException("Invalid email or password.");
             }
 
 
             if (!user.EmailConfirmed)
             {
                 _logger.LogWarning("Login attempt for unconfirmed email: {Email}", request.Email);
-                return Result<LoginResponseDto>.FailureResponse(new List<string> { "Email not confirmed. Please check your inbox." }, "Login failed.");
+                throw new ForbiddenAccessException("Email not confirmed. Please check your inbox.");
             }
             await _userManager.ResetAccessFailedCountAsync(user);
 
@@ -67,9 +68,7 @@ namespace Nilearn.Application.Features.Auth.Login.Commands
             if (!updateResult.Succeeded)
             {
                 _logger.LogError("Failed to update user {UserId} with new refresh token. Errors: {Errors}", user.Id, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
-                return Result<LoginResponseDto>.FailureResponse(
-                    updateResult.Errors.Select(e => e.Description).ToList(),
-                    "Login failed.");
+                throw new BadRequestException("Login failed", updateResult.Errors.Select(e => e.Description));
             }
             var response = new LoginResponseDto
             {

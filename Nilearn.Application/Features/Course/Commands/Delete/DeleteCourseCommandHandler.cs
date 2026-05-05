@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Interfaces;
 
@@ -33,7 +34,7 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
         if (course == null)
         {
             _logger.LogWarning("Course with ID {CourseId} not found for deletion.", request.Id);
-            return Result<string>.FailureResponse(message: "Course not found.");
+            throw new NotFoundException("Course", request.Id);
         }
 
         if (course.InstructorId != instructorId)
@@ -43,7 +44,7 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
                 request.UserId,
                 request.Id);
 
-            return Result<string>.FailureResponse(message: "You are not allowed to delete this course.");
+            throw new ForbiddenAccessException("You are not allowed to delete this course.");
         }
         try
         {
@@ -61,7 +62,7 @@ internal sealed class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseC
         var deleted = await _unitOfWork.CourseRepository.DeleteAsync(course.Id, cancellationToken);
         if (!deleted)
         {
-            return Result<string>.FailureResponse(message: "Failed to delete course.");
+            throw new BadRequestException("Failed to delete course.");
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);

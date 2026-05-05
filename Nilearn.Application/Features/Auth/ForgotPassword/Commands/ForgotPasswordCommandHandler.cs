@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
@@ -41,33 +41,17 @@ namespace Nilearn.Application.Features.Auth.ForgotPassword.Commands
                 );
             }
 
-            try
-            {
-                await _forgotPasswordService.SendResetPasswordEmailAsync(user, cancellationToken);
+            await _forgotPasswordService.SendResetPasswordEmailAsync(user, cancellationToken);
 
-                _logger.LogInformation(
-                    "Password reset email successfully queued for user {Email} at {UtcNow}",
-                    user.Email,
-                    DateTime.UtcNow
-                );
+            _logger.LogInformation(
+                "Password reset email successfully queued for user {Email} at {UtcNow}",
+                user.Email,
+                DateTime.UtcNow
+            );
 
-                return Result<string>.SuccessResponse( message:
-                    "If the email exists, a reset link has been sent."
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Failed to send password reset email to user {Email} at {UtcNow}",
-                    user.Email,
-                    DateTime.UtcNow
-                );
-
-                return Result<string>.FailureResponse(
-                    message: "An error occurred while processing your request. Please try again later."
-                );
-            }
+            return Result<string>.SuccessResponse(message:
+                "If the email exists, a reset link has been sent."
+            );
         }
     }
 }

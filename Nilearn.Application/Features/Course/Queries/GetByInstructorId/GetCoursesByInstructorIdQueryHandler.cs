@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Course.DTOs;
 using Nilearn.Domain.Interfaces;
@@ -32,36 +33,28 @@ namespace Nilearn.Application.Features.Course.Queries.GetByInstructorId
 
         public async Task<Result<List<CourseDto>>> Handle(GetCoursesByInstructorIdQuery request, CancellationToken cancellationToken)
         {
-            try
+            var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId);
+            if (instructorId is null)
             {
-                var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId);
-                if (instructorId is null)
-                {
-                    _logger.LogWarning("Instructor not found for user ID {UserId}", request.UserId);
-                    return Result<List<CourseDto>>.FailureResponse(message: "Instructor not found.");
-                }
-
-                var courses = await _unitOfWork.CourseRepository.GetByInstructorId(instructorId.Value).ToListAsync(cancellationToken);
-
-                var courseDtos = courses.Select(course => new CourseDto
-                {
-                    Id = course.Id,
-                    Title = course.Title,
-                    ThumbnailUrl = _mediaService.GetImageUrl(course.ThumbnailPublicId),
-                    CategoryName = course.Category.Name,
-                    InstructorName = $"{course.Instructor.User.FirstName} {course.Instructor.User.LastName}",
-                    Price = course.Price,
-                    IsPublished = course.IsPublished,
-                    CreatedAt = course.CreatedAt
-                }).ToList();
-
-                return Result<List<CourseDto>>.SuccessResponse(courseDtos, "Courses retrieved successfully.");
+                _logger.LogWarning("Instructor not found for user ID {UserId}", request.UserId);
+                throw new NotFoundException("Instructor", request.UserId);
             }
-            catch (Exception ex)
+
+            var courses = await _unitOfWork.CourseRepository.GetByInstructorId(instructorId.Value).ToListAsync(cancellationToken);
+
+            var courseDtos = courses.Select(course => new CourseDto
             {
-                _logger.LogError(ex, "Error retrieving courses for user with ID {UserId}", request.UserId);
-                return Result<List<CourseDto>>.FailureResponse(message:"Failed to retrieve courses.");
-            }
+                Id = course.Id,
+                Title = course.Title,
+                ThumbnailUrl = _mediaService.GetImageUrl(course.ThumbnailPublicId),
+                CategoryName = course.Category.Name,
+                InstructorName = $"{course.Instructor.User.FirstName} {course.Instructor.User.LastName}",
+                Price = course.Price,
+                IsPublished = course.IsPublished,
+                CreatedAt = course.CreatedAt
+            }).ToList();
+
+            return Result<List<CourseDto>>.SuccessResponse(courseDtos, "Courses retrieved successfully.");
         }
     }
 }

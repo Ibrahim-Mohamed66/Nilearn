@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nilearn.Application.Features.Category.Commands.CreateCategory;
@@ -23,34 +23,21 @@ namespace Nilearn.API.Controllers
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
-            if (result.Success)
-            {
-                return CreatedAtAction(nameof(CreateCategory), result);
-            }
-            return BadRequest(result);
+            return CreatedAtAction(nameof(CreateCategory), result);
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateCategory(int id,[FromBody] UpdateCategoryCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command with { Id = id }, cancellationToken);
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-            return BadRequest(result);
+            return Ok(result);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllCategories([FromQuery] GetAllCategoriesQuery query, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(query, cancellationToken);
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            return BadRequest(result);
+            return Ok(result);
         }
 
         [HttpGet("{id:int}")]
@@ -69,11 +56,7 @@ namespace Nilearn.API.Controllers
         public async Task<IActionResult> DeleteCategory(int id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new DeleteCategoryCommand(id), cancellationToken);
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-            return BadRequest(result);
+            return Ok(result);
         }
     }
 }

@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Domain.Interfaces;
+using Nilearn.Application.Common.Exceptions;
 
 namespace Nilearn.Application.Features.Category.Commands.UpdateCategory;
 
@@ -23,7 +24,7 @@ internal sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCateg
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category is null)
         {
-            return Result<string>.FailureResponse( message:"Category not found.");
+            throw new NotFoundException("Category", request.Id);
         }
 
         category.Name = request.Name;

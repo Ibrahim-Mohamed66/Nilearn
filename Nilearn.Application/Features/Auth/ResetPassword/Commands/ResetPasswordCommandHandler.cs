@@ -1,7 +1,8 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Enums;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 
 
@@ -22,37 +23,22 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
 
         public async Task<Result<string>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
-            try
+            var decodedToken = Uri.UnescapeDataString(request.Token);
+
+            var result = await _forgotPasswordService.ResetPasswordAsync(
+                request.Email,
+                decodedToken,
+                request.NewPassword,
+                cancellationToken
+            );
+
+            return result switch
             {
-                var decodedToken = Uri.UnescapeDataString(request.Token);
-
-                var result = await _forgotPasswordService.ResetPasswordAsync(
-                    request.Email,
-                    decodedToken,
-                    request.NewPassword,
-                    cancellationToken
-                );
-
-                return result switch
-                {
-                    ResetPasswordResult.Success => HandleSuccess(request.Email),
-                    ResetPasswordResult.UserNotFound => HandleUserNotFound(request.Email),
-                    ResetPasswordResult.InvalidToken => HandleInvalidToken(request.Email),
-                    _ => HandleUnknownError(request.Email)
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Unexpected error while resetting password for {Email}",
-                    request.Email
-                );
-
-                return Result<string>.FailureResponse(
-                    message: "An unexpected error occurred. Please try again later."
-                );
-            }
+                ResetPasswordResult.Success => HandleSuccess(request.Email),
+                ResetPasswordResult.UserNotFound => HandleUserNotFound(request.Email),
+                ResetPasswordResult.InvalidToken => HandleInvalidToken(request.Email),
+                _ => HandleUnknownError(request.Email)
+            };
         }
 
         #region Helpers
@@ -84,9 +70,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
                 email
             );
 
-            return Result<string>.FailureResponse(
-                message: "Invalid or expired reset token."
-            );
+            throw new BadRequestException("Invalid or expired reset token.");
         }
 
         private Result<string> HandleUnknownError(string email)
@@ -96,9 +80,7 @@ namespace Nilearn.Application.Features.Auth.ResetPassword.Commands
                 email
             );
 
-            return Result<string>.FailureResponse(
-                message: "Something went wrong. Please try again later."
-            );
+            throw new BadRequestException("Something went wrong. Please try again later.");
         } 
         #endregion
     }

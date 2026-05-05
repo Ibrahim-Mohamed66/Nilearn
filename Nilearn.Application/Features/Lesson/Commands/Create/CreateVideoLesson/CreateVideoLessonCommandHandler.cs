@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Lesson.DTOs;
 using Nilearn.Domain.Enums;
@@ -30,24 +31,20 @@ namespace Nilearn.Application.Features.Lesson.Commands.Create.CreateVideoLesson
             if (section is null)
             {
                 _logger.LogWarning("Section {SectionId} not found", request.SectionId);
-                return Result<LessonResponse>.FailureResponse(
-                    ["Section not found"],
-                    "Failed to create video lesson");
+                throw new NotFoundException("Section", request.SectionId);
             }
             var isOwner = await _unitOfWork.CourseRepository.IsOwner(section.CourseId, request.UserId, cancellationToken);
             if (!isOwner)
             {
                 _logger.LogWarning("User {UserId} is not the owner of section {SectionId}", request.UserId, request.SectionId);
-                return Result<LessonResponse>.FailureResponse(
-                     ["Unauthorized access."],
-                    "Failed to create video lesson");
+                throw new ForbiddenAccessException("You are not authorized to create lessons in this section.");
             }
 
             var videoUploadResult = await _mediaService.UploadVideoAsync(request.VideoFile.Content, request.VideoFile.FileName, cancellationToken);
             if (videoUploadResult == null)
             {
                 _logger.LogError("Failed to upload video for lesson {LessonTitle}", request.Title);
-                return Result<LessonResponse>.FailureResponse(["Failed to upload video"], "Failed to create video lesson");
+                throw new BadRequestException("Failed to upload video");
             }
             await _unitOfWork.BeginTransactionAsync(cancellationToken);
             try

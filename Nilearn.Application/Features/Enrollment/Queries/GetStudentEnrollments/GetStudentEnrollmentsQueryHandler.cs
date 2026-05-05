@@ -34,14 +34,12 @@ internal sealed class GetStudentEnrollmentsQueryHandler
         _logger.LogInformation("Fetching enrollments for student (UserId: {UserId}): Page {Page}, Size {Size}",
             request.UserId, request.PageNumber, request.PageSize);
 
-        try
+        var student = await _unitOfWork.StudentRepository.GetByUserId(request.UserId, cancellationToken);
+        if (student is null)
         {
-            var student = await _unitOfWork.StudentRepository.GetByUserId(request.UserId, cancellationToken);
-            if (student is null)
-            {
-                _logger.LogWarning("Student not found for UserId: {UserId}", request.UserId);
-                return Result<PagedResponse<EnrollmentDto>>.FailureResponse(message: "Student not found");
-            }
+            _logger.LogWarning("Student not found for UserId: {UserId}", request.UserId);
+            throw new Nilearn.Application.Common.Exceptions.NotFoundException("Student", request.UserId);
+        }
 
             // 1. Get the IQueryable from the repo
             var query = _unitOfWork.EnrollmentRepository.QueryByStudentId(student.Id, request.Status);
@@ -76,12 +74,7 @@ internal sealed class GetStudentEnrollmentsQueryHandler
             _logger.LogInformation("Successfully retrieved {Count} enrollments for student {StudentId} out of {TotalCount}",
                 pagedEnrollments.Items.Count, student.Id, pagedEnrollments.TotalCount);
 
-            return Result<PagedResponse<EnrollmentDto>>.SuccessResponse(pagedEnrollments, "Enrollments retrieved successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching enrollments for student (UserId: {UserId})", request.UserId);
-            return Result<PagedResponse<EnrollmentDto>>.FailureResponse(message: "Failed to fetch enrollments. Please try again later.");
-        }
+        return Result<PagedResponse<EnrollmentDto>>.SuccessResponse(pagedEnrollments, "Enrollments retrieved successfully");
     }
 }
+

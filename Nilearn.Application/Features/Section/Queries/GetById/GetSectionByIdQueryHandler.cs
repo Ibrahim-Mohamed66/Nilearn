@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Section.DTOs;
 using Nilearn.Domain.Interfaces;
 
@@ -27,7 +28,7 @@ internal sealed class GetSectionByIdQueryHandler : IRequestHandler<GetSectionByI
         if (!courseExists)
         {
             _logger.LogWarning("Course not found | CourseId: {CourseId}", request.CourseId);
-            return Result<SectionResponse>.FailureResponse(message: "Course not found.");
+            throw new NotFoundException("Course", request.CourseId);
         }
 
         var section = await _unitOfWork.SectionRepository.GetByIdAsync(request.Id, cancellationToken);
@@ -36,7 +37,7 @@ internal sealed class GetSectionByIdQueryHandler : IRequestHandler<GetSectionByI
             _logger.LogWarning(
                 "Section not found | SectionId: {SectionId} | CourseId: {CourseId}",
                 request.Id, request.CourseId);
-            return Result<SectionResponse>.FailureResponse(message: "Section not found.");
+            throw new NotFoundException("Section", request.Id);
         }
 
         var response = new SectionResponse(

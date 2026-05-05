@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nilearn.API.Requests;
@@ -8,6 +8,7 @@ using Nilearn.Application.Features.Enrollment.Queries.GetCourseEnrollments;
 using Nilearn.Application.Features.Enrollment.Queries.GetStudentEnrollments;
 using Nilearn.Application.Features.Enrollment.Queries.IsEnrolled;
 using Nilearn.Domain.Enums;
+using Nilearn.Application.Common.Exceptions;
 using System.Security.Claims;
 
 namespace Nilearn.API.Controllers
@@ -47,10 +48,13 @@ namespace Nilearn.API.Controllers
             CancellationToken cancellationToken = default)
         {
             if (pageNumber <= 0 || pageSize <= 0)
-                return BadRequest(Result<string>.FailureResponse(message: "Page number and page size must be greater than zero."));
-
+            {
+                throw new BadRequestException("Page number and page size must be greater than zero.");
+            }
             if (pageSize > 100)
-                return BadRequest(Result<string>.FailureResponse(message: "Page size cannot exceed 100."));
+            {
+                throw new BadRequestException("Page size cannot exceed 100.");
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId is null)
@@ -59,12 +63,8 @@ namespace Nilearn.API.Controllers
             var query = new GetStudentEnrollmentsQuery(userId, pageNumber, pageSize, status);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (!result.Success)
-                return BadRequest(result);
-
             return Ok(result);
         }
-
         [HttpGet("course/{courseId:int}")]
         [Authorize(Policy = "InstructorOnly")]
         public async Task<IActionResult> GetCourseEnrollments(
@@ -75,20 +75,19 @@ namespace Nilearn.API.Controllers
             CancellationToken cancellationToken = default)
         {
             if (pageNumber <= 0 || pageSize <= 0)
-                return BadRequest(Result<string>.FailureResponse(message: "Page number and page size must be greater than zero."));
-
+            {
+                throw new BadRequestException("Page number and page size must be greater than zero.");
+            }
             if (pageSize > 100)
-                return BadRequest(Result<string>.FailureResponse(message: "Page size cannot exceed 100."));
+            {
+                throw new BadRequestException("Page size cannot exceed 100.");
+            }
 
             var query = new GetCourseEnrollmentsQuery(courseId, pageNumber, pageSize, status);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (!result.Success)
-                return BadRequest(result);
-
             return Ok(result);
         }
-
         [HttpGet("is-enrolled/{courseId:int}")]
         [Authorize(Policy = "StudentOnly")]
         public async Task<IActionResult> IsEnrolled(int courseId, CancellationToken cancellationToken)
@@ -99,9 +98,6 @@ namespace Nilearn.API.Controllers
 
             var query = new IsEnrolledQuery(userId, courseId);
             var result = await _mediator.Send(query, cancellationToken);
-
-            if (!result.Success)
-                return BadRequest(result);
 
             return Ok(result);
         }

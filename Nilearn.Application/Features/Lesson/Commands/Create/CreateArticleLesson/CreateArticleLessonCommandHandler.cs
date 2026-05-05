@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Features.Lesson.DTOs;
 using Nilearn.Domain.Enums;
 using Nilearn.Domain.Interfaces;
@@ -25,9 +26,7 @@ internal sealed class CreateArticleLessonCommandHandler : IRequestHandler<Create
         if (!isOwner)
         {
             _logger.LogWarning("User {UserId} is not the owner of section {SectionId}", request.UserId, request.SectionId);
-            return Result<LessonResponse>.FailureResponse(
-                 ["Unauthorized access."],
-                "Failed to create Article lesson");
+            throw new ForbiddenAccessException("You are not authorized to create lessons in this section.");
         }
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);

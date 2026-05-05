@@ -23,10 +23,7 @@ internal sealed class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCateg
     {
         _logger.LogInformation("Fetching categories: Page {Page}, Size {Size}", request.PageNumber, request.PageSize);
 
-        try
-        {
-            // Fetch paged categories from repository
-            var categories = _unitOfWork.CategoryRepository.GetAll();
+        var categories = _unitOfWork.CategoryRepository.GetAll();
             var pagedCategories = await categories.ToPagedAsync(request.PageNumber, request.PageSize, cancellationToken);
 
             // Map to DTOs
@@ -50,15 +47,6 @@ internal sealed class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCateg
             _logger.LogInformation("Successfully retrieved {Count} categories out of {TotalCount}"
                 , pagedResult.Items.Count, pagedResult.TotalCount);
 
-            return  Result<PagedResponse<CategoryDto>>.SuccessResponse(pagedResult, "Categories retrieved successfully");
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching categories for page {Page} with size {Size}", 
-                request.PageNumber, request.PageSize);
-
-            return  Result<PagedResponse<CategoryDto>>.FailureResponse(message:"Failed to fetch categories. Please try again later.");
-        }
+        return  Result<PagedResponse<CategoryDto>>.SuccessResponse(pagedResult, "Categories retrieved successfully");
     }
 }

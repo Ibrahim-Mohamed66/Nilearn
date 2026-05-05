@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Extensions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Enrollment.DTOs;
@@ -22,14 +23,12 @@ internal sealed class GetCourseEnrollmentsQueryHandler(
         logger.LogInformation("Fetching enrollments for course {CourseId}: Page {Page}, Size {Size}",
             request.CourseId, request.PageNumber, request.PageSize);
 
-        try
+        var course = await unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
+        if (course is null)
         {
-            var course = await unitOfWork.CourseRepository.GetByIdAsync(request.CourseId, cancellationToken);
-            if (course is null)
-            {
-                logger.LogWarning("Course not found: {CourseId}", request.CourseId);
-                return Result<PagedResponse<EnrollmentDto>>.FailureResponse(message: "Course not found");
-            }
+            logger.LogWarning("Course not found: {CourseId}", request.CourseId);
+            throw new NotFoundException("Course", request.CourseId);
+        }
 
             var query = unitOfWork.EnrollmentRepository.QueryByCourseId(request.CourseId, request.Status);
 
@@ -61,12 +60,6 @@ internal sealed class GetCourseEnrollmentsQueryHandler(
             logger.LogInformation("Successfully retrieved {Count} enrollments for course {CourseId} out of {TotalCount}",
                 pagedEnrollments.Items.Count, request.CourseId, pagedEnrollments.TotalCount);
 
-            return Result<PagedResponse<EnrollmentDto>>.SuccessResponse(pagedEnrollments, "Enrollments retrieved successfully");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error fetching enrollments for course {CourseId}", request.CourseId);
-            return Result<PagedResponse<EnrollmentDto>>.FailureResponse(message: "Failed to fetch enrollments. Please try again later.");
-        }
+        return Result<PagedResponse<EnrollmentDto>>.SuccessResponse(pagedEnrollments, "Enrollments retrieved successfully");
     }
 }

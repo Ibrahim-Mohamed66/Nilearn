@@ -1,6 +1,7 @@
 using MediatR;
 using System.Linq;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Extensions;
 using Nilearn.Application.Features.Wallets.DTOs;
 using Nilearn.Domain.Interfaces;
@@ -26,7 +27,7 @@ public class GetInstructorTransactionsQueryHandler : IRequestHandler<GetInstruct
         if (instructorId is null)
         {
             _logger.LogInformation("Instructor not found for user ID: {UserId}", request.UserId);
-            return Result<PagedResponse<WalletTransactionDto>>.FailureResponse(message: "Instructor not found.");
+            throw new NotFoundException("Instructor", request.UserId);
         }
         var query = _unitOfWork.WalletTransactionRepository.QueryByInstructorId(instructorId.Value, request.StartDate, request.EndDate);
 

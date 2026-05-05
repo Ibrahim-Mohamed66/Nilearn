@@ -30,7 +30,7 @@ public class WalletController : ControllerBase
 
         var query = new GetInstructorWalletQuery(userId);
         var result = await _mediator.Send(query, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return Ok(result);
     }
 
     [HttpGet("transactions")]
@@ -47,7 +47,7 @@ public class WalletController : ControllerBase
 
         var query = new GetInstructorTransactionsQuery(userId, pageNumber, pageSize, startDate, endDate);
         var result = await _mediator.Send(query, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return Ok(result);
     }
 
     [HttpGet("earnings-summary")]
@@ -59,7 +59,7 @@ public class WalletController : ControllerBase
 
         var query = new GetInstructorEarningsSummaryQuery(userId);
         var result = await _mediator.Send(query, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return Ok(result);
     }
 
     [HttpGet("platform-revenue")]
@@ -68,7 +68,7 @@ public class WalletController : ControllerBase
     {
         var query = new GetPlatformRevenueQuery();
         var result = await _mediator.Send(query, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return Ok(result);
     }
 
     private string? GetUserId()

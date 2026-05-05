@@ -1,8 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
 using Nilearn.Application.Common.Enums;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Entities;
 using System;
@@ -40,19 +41,19 @@ namespace Nilearn.Application.Features.Auth.EmailVerification.ConfirmEmailVerifi
 
                 case EmailConfirmationResult.UserNotFound:
                     _logger.LogWarning("Email confirmation failed for user {UserId}: user not found.", userId);
-                    return Result<string>.FailureResponse(new List<string> { "User not found" }, "User not found");
+                    throw new NotFoundException("User", userId);
 
                 case EmailConfirmationResult.InvalidToken:
                     _logger.LogWarning("Email confirmation failed for user {UserId}: invalid or expired token.", userId);
-                    return Result<string>.FailureResponse(new List<string> { "Invalid or expired token" }, "Invalid or expired token");
+                    throw new BadRequestException("Invalid or expired token");
 
                 case EmailConfirmationResult.AlreadyConfirmed:
                     _logger.LogInformation("Email confirmation skipped for user {UserId}: email already confirmed.", userId);
-                    return Result<string>.FailureResponse(new List<string> { "Email already confirmed" }, "Email already confirmed");
+                    throw new ConflictException("User", "Email already confirmed");
 
                 default:
                     _logger.LogError("Email confirmation failed for user {UserId}: unexpected error occurred.", userId);
-                    return Result<string>.FailureResponse(new List<string> { "An unexpected error occurred" }, "An unexpected error occurred");
+                    throw new BadRequestException("An unexpected error occurred");
             }
         }
     }

@@ -27,9 +27,7 @@ internal sealed class IsEnrolledQueryHandler
         _logger.LogInformation("Checking enrollment for user {UserId} in course {CourseId}",
             request.UserId, request.CourseId);
 
-        try
-        {
-            var student = await _unitOfWork.StudentRepository.GetByUserId(request.UserId, cancellationToken);
+        var student = await _unitOfWork.StudentRepository.GetByUserId(request.UserId, cancellationToken);
             if (student is null)
             {
                 _logger.LogWarning("Student not found for UserId: {UserId}", request.UserId);
@@ -55,13 +53,6 @@ internal sealed class IsEnrolledQueryHandler
                     Status = enrollment.Status.ToString(),
                     EnrollmentId = enrollment.Id
                 },
-                "Enrollment status retrieved successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking enrollment for user {UserId} in course {CourseId}",
-                request.UserId, request.CourseId);
-            return Result<IsEnrolledResponse>.FailureResponse(message:"Failed to check enrollment status");
-        }
+            "Enrollment status retrieved successfully");
     }
 }

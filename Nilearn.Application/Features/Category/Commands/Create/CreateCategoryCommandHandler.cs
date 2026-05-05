@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Domain.Interfaces;
 using System.Xml.Linq;
 
@@ -24,7 +25,7 @@ internal sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCateg
         if(existing != null)
         {
             _logger.LogWarning("Category with name '{Name}' already exists.", request.Name);
-            return Result<string>.FailureResponse(new List<string> { "Category with the same name already exists." }, "Category with the same name already exists.");
+            throw new ConflictException("Category", "Category with the same name already exists.");
         }
 
         var category = new Domain.Entities.Category

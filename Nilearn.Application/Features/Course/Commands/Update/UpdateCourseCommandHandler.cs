@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Interfaces;
 
@@ -35,7 +36,7 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
         if (course == null)
         {
             _logger.LogWarning("Course not found for Id: {CourseId}", request.CourseId);
-            return Result<string>.FailureResponse(message: "Course not found.");
+            throw new NotFoundException("Course", request.CourseId);
         }
 
         var instructorId = await _unitOfWork.InstructorRepository.GetIdByUserIdAsync(request.UserId, cancellationToken);
@@ -43,14 +44,14 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
         if (instructorId == null || course.InstructorId != instructorId.Value)
         {
             _logger.LogWarning("Unauthorized course update attempt by UserId: {UserId} for CourseId: {CourseId}", request.UserId, request.CourseId);
-            return Result<string>.FailureResponse(message: "Unauthorized to update this course.");
+            throw new ForbiddenAccessException("You are not authorized to update this course.");
         }
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
 
         if (category == null)
         {
             _logger.LogWarning("Invalid CategoryId: {CategoryId}", request.CategoryId);
-            return Result<string>.FailureResponse(message: "Invalid category.");
+            throw new NotFoundException("Category", request.CategoryId);
         }
 
 
@@ -59,16 +60,8 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
 
         if (request.Thumbnail != null)
         {
-            try
-            {
-                var result = await _mediaService.UploadImageAsync(request.Thumbnail.Content, request.Thumbnail.FileName,request.Purpose,cancellationToken);
-                newThumbnailPublicId = result.PublicId;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to upload new thumbnail for course: {CourseId}", request.CourseId);
-                return Result<string>.FailureResponse(message: "Failed to upload thumbnail.");
-            }
+            var result = await _mediaService.UploadImageAsync(request.Thumbnail.Content, request.Thumbnail.FileName, request.Purpose, cancellationToken);
+            newThumbnailPublicId = result.PublicId;
         }
         
 
@@ -129,7 +122,7 @@ internal sealed class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseC
                 }
             }
 
-            return Result<string>.FailureResponse(message: "Database error while updating the course.");
+            throw;
         }
     }
 

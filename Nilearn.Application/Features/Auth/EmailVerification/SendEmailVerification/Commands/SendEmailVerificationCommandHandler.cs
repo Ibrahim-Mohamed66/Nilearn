@@ -1,7 +1,8 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Nilearn.Application.Common;
+using Nilearn.Application.Common.Exceptions;
 using Nilearn.Application.Common.Interfaces;
 using Nilearn.Domain.Entities;
 using Nilearn.Shared.Models;
@@ -30,13 +31,13 @@ namespace Nilearn.Application.Features.Auth.EmailVerification.SendEmailVerificat
             if (user == null)
             {
                 _logger.LogWarning("Verification email failed for user {UserId}: user not found.", request.UserId);
-                return Result<string>.FailureResponse(new List<string> { "User not found" }, "User not found");
+                throw new NotFoundException("User", request.UserId);
             }
 
             if (user.EmailConfirmed)
             {
                 _logger.LogInformation("Verification email skipped for user {UserId}: email already confirmed.", request.UserId);
-                return Result<string>.FailureResponse(new List<string> { "Email already confirmed" }, "Email already confirmed");
+                throw new ConflictException("User", "Email already confirmed");
             }
 
             await _emailVerificationService.SendVerificationEmailAsync(user, cancellationToken);

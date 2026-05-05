@@ -7,6 +7,7 @@ using Nilearn.Application.Common.Interfaces;
 using Nilearn.Application.Features.Payments.Queries.GetStudentPayments;
 using Nilearn.Domain.Enums;
 using System.Security.Claims;
+using Nilearn.Application.Common.Exceptions;
 
 namespace Nilearn.API.Controllers
 {
@@ -32,10 +33,14 @@ namespace Nilearn.API.Controllers
             CancellationToken cancellationToken = default)
         {
             if (pageNumber <= 0 || pageSize <= 0)
-                return BadRequest(Result<string>.FailureResponse(message: "Page number and page size must be greater than zero."));
+            {
+                throw new BadRequestException("Page number and page size must be greater than zero.");
+            }
 
             if (pageSize > 100)
-                return BadRequest(Result<string>.FailureResponse(message: "Page size cannot exceed 100."));
+            {
+                throw new BadRequestException("Page size cannot exceed 100.");
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId is null)
@@ -43,9 +48,6 @@ namespace Nilearn.API.Controllers
 
             var query = new GetStudentPaymentsQuery(userId, pageNumber, pageSize, status);
             var result = await _mediator.Send(query, cancellationToken);
-
-            if (!result.Success)
-                return BadRequest(result);
 
             return Ok(result);
         }
@@ -58,35 +60,20 @@ namespace Nilearn.API.Controllers
             using var reader = new StreamReader(Request.Body);
             var payload = await reader.ReadToEndAsync();
 
-            try
-            {
-                var result = _paymentGateway.ValidateAndParseWebhook(payload, hmac);
+            var result = _paymentGateway.ValidateAndParseWebhook(payload, hmac);
 
-                var command = new Nilearn.Application.Features.Payments.Commands.ProcessPaymentWebhookCommand(
-                    result.TransactionId,
-                    result.OrderId,
-                    result.IsSuccess,
-                    result.Amount,
-                    result.Currency,
-                    result.MerchantReferenceId,
-                    result.EnrollmentId
-                );
+            var command = new Nilearn.Application.Features.Payments.Commands.ProcessPaymentWebhookCommand(
+                result.TransactionId,
+                result.OrderId,
+                result.IsSuccess,
+                result.Amount,
+                result.Currency,
+                result.MerchantReferenceId,
+                result.EnrollmentId
+            );
 
-                var processResult = await _mediator.Send(command,cancellationToken);
-                if (processResult.Success)
-                {
-                    return Ok();
-                }
-                return BadRequest(processResult.Errors);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Unauthorized();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _mediator.Send(command, cancellationToken);
+            return Ok();
         }
     }
 }
