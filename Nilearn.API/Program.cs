@@ -61,7 +61,7 @@ namespace Nilearn.API
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins(configuration.FrontendUrl)
+                    policy.WithOrigins(configuration.FrontendUrl ?? "")
                            .AllowAnyHeader()
                            .AllowAnyMethod()
                            .AllowCredentials();
@@ -69,9 +69,7 @@ namespace Nilearn.API
             });
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
 
-            // Replace the placeholder with the environment variable
-            var pgPassword = Environment.GetEnvironmentVariable("PG_PASSWORD") ?? "";
-            connectionString = connectionString.Replace("${PG_PASSWORD}", pgPassword);
+            
 
             builder.Services.AddHangfire(config =>
             {
@@ -117,10 +115,11 @@ namespace Nilearn.API
             {
 
                 app.MapOpenApi();
-                app.UseSwagger();
-                app.UseSwaggerUI();
+               
             }
-            //await app.SeedDatabaseAsync();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            await app.SeedDatabaseAsync();
             app.UseCors("AllowFrontend");
             app.UseHttpsRedirection();
             app.UseMiddleware<RequestLoggingMiddleware>();

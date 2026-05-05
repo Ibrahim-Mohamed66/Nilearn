@@ -16,12 +16,8 @@ namespace Nilearn.Infrastructure.DependencyInjection
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            // Get the connection string from appsettings.json
+            // Get the connection string directly
             var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "";
-
-            // Replace the placeholder with the environment variable
-            var pgPassword = Environment.GetEnvironmentVariable("PG_PASSWORD") ?? "";
-            connectionString = connectionString.Replace("${PG_PASSWORD}", pgPassword);
 
             services.AddScoped<TimestampInterceptor>();
             services.AddScoped<DomainEventInterceptor>();

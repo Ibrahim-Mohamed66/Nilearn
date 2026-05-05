@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Nilearn.Application.Common.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Nilearn.Infrastructure.Email
 
             using var message = new MailMessage
             {
-                From = new MailAddress(_settings.From,"Nilearn"),
+                From = new MailAddress(_settings.SmtpFrom,"Nilearn"),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true
