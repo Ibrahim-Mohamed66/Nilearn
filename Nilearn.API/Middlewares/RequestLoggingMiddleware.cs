@@ -88,7 +88,8 @@ namespace Nilearn.API.Middlewares
                 if (jsonNode == null) return body;
 
                 // List of sensitive fields to mask (checked case-insensitively)
-                string[] sensitiveFields = { "password", "token", "accesstoken", "accesstokens", "refreshtoken", "refreshtokens", "creditcard", "ssn" };
+                string[] sensitiveFields = { "password", "token", "accesstoken", "accesstokens", "refreshtoken", "refreshtokens","confirmpassword" ,"paymenturl", "creditcard", "ssn" };
+
 
                 MaskNode(jsonNode, sensitiveFields);
 
