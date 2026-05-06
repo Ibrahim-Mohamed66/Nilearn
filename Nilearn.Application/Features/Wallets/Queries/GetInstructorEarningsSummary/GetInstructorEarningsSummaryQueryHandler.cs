@@ -41,7 +41,7 @@ public class GetInstructorEarningsSummaryQueryHandler : IRequestHandler<GetInstr
             return Result<EarningsSummaryDto>.SuccessResponse(newEarningSummary, message: "No earnings found.");
         }
 
-        var firstDayOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        var firstDayOfMonth = DateTime.SpecifyKind(new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1), DateTimeKind.Utc);
 
         var transactionsQuery = _unitOfWork.WalletTransactionRepository.QueryByInstructorId(instructorId.Value);
 
